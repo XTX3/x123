@@ -1,372 +1,255 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MicroPOS - نقطة بيع</title>
-  <style>
-    body {
-      font-family: 'Tahoma', sans-serif;
-      background: #f5f5f5;
-      margin: 0;
-      padding: 0;
-      text-align: center;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>متجر العملات الافتراضية</title>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDPcyxpHRuLx9T2CO4LJ-n9jaqAynUjvqw",
+    authDomain: "xix5-a119a.firebaseapp.com",
+    projectId: "xix5-a119a",
+    storageBucket: "xix5-a119a.appspot.com",
+    messagingSenderId: "332265425367",
+    appId: "1:332265425367:web:0a95e71d8bd0058503a392",
+    measurementId: "G-RLK4PXMV7P"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  function generateCode() {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    let code = "";
+    for (let i = 0; i < 8; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    header {
-      background-color: #4a90e2;
-      color: white;
-      padding: 1rem;
-      font-size: 1.5rem;
+    return code;
+  }
+
+  async function login(email, password) {
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      document.getElementById("authPanel").style.display = "none";
+      document.getElementById("userPanel").style.display = "block";
+      document.getElementById("topBar").style.display = "flex";
+      loadUserData(user.uid, user.email);
+    } catch (error) {
+      alert("خطأ: " + error.message);
     }
-    .container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 20px;
-      padding: 20px;
+  }
+
+  async function register(email, password) {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      const code = generateCode();
+      await setDoc(doc(db, "users", user.uid), { 
+        email: email,
+        balance: 0,
+        code: code,
+        name: "مستخدم جديد"
+      });
+      alert("تم إنشاء الحساب بنجاح!");
+    } catch (error) {
+      alert("خطأ في التسجيل: " + error.message);
     }
-    .card {
-      background: white;
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      transition: 0.3s;
-      cursor: pointer;
+  }
+
+  async function loadUserData(uid, email) {
+    const userRef = doc(db, "users", uid);
+    const userSnap = await getDoc(userRef);
+    if(userSnap.exists()) {
+      const data = userSnap.data();
+      document.getElementById("displayCode").innerText = data.code || "------";
+      document.getElementById("nameText").innerText = data.name || "مستخدم";
+      document.getElementById("displayBalance").innerText = data.balance;
+
+      // إعداد أيقونة التعديل
+      document.getElementById("editIcon").onclick = () => {
+        document.getElementById("nameText").style.display = "none";
+        document.getElementById("editIcon").style.display = "none";
+        document.getElementById("nameInput").style.display = "inline-block";
+        document.getElementById("saveBtn").style.display = "inline-block";
+        document.getElementById("nameInput").value = document.getElementById("nameText").innerText;
+      };
+      document.getElementById("saveBtn").onclick = async () => {
+        const newName = document.getElementById("nameInput").value;
+        await updateDoc(doc(db, "users", uid), { name: newName });
+        document.getElementById("nameText").innerText = newName;
+        document.getElementById("nameText").style.display = "inline-block";
+        document.getElementById("editIcon").style.display = "inline-block";
+        document.getElementById("nameInput").style.display = "none";
+        document.getElementById("saveBtn").style.display = "none";
+      };
+
+      if(email === "uusu.06@gmail.com") {
+        document.getElementById("adminPanel").style.display = "block";
+        await updateDoc(userRef, { balance: 10000000 });
+        document.getElementById("adminBalance").innerText = "رصيد المسؤول: 10000000$";
+      }
     }
-    .card:hover {
-      transform: scale(1.05);
+  }
+
+  async function searchUser(identifier) {
+    document.getElementById("modal").style.display = "flex";
+    document.getElementById("modalContent").innerHTML = '<div class="loader"></div>';
+
+    try {
+      let data, uid;
+      if(identifier.includes("@")) {
+        const usersCol = collection(db, "users");
+        const q = query(usersCol, where("email", "==", identifier));
+        const querySnapshot = await getDocs(q);
+        if(querySnapshot.empty){
+          document.getElementById("modalContent").innerHTML = "<p>المستخدم غير موجود!</p>";
+          return null;
+        }
+        const userDoc = querySnapshot.docs[0];
+        uid = userDoc.id;
+        data = userDoc.data();
+      } else {
+        const usersCol = collection(db, "users");
+        const q = query(usersCol, where("code", "==", identifier));
+        const querySnapshot = await getDocs(q);
+        if(querySnapshot.empty){
+          document.getElementById("modalContent").innerHTML = "<p>المستخدم غير موجود!</p>";
+          return null;
+        }
+        const userDoc = querySnapshot.docs[0];
+        uid = userDoc.id;
+        data = userDoc.data();
+      }
+
+      document.getElementById("modalContent").innerHTML = `
+        <p><b>البريد:</b> ${data.email}</p>
+        <p><b>الرصيد الحالي:</b> ${data.balance} دولار</p>
+        <input type="number" id="chargeAmount" placeholder="المبلغ"><br>
+        <button onclick="chargeUser('${uid}', ${data.balance})">شحن الرصيد</button>
+      `;
+      return uid;
+    } catch (err) {
+      document.getElementById("modalContent").innerHTML = "<p>خطأ: "+err.message+"</p>";
     }
-    .card img {
-      width: 50px;
-      margin-bottom: 10px;
-    }
-    .card-title {
-      font-size: 1.1rem;
-    }
-    #inventorySection, #salesSection, #reportsSection, #productsSection, #clientsSection {
-      display: none;
-      text-align: right;
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
-    }
-    input, button {
-      margin: 5px 0;
-      padding: 10px;
-      width: 100%;
-      box-sizing: border-box;
-      font-size: 1rem;
-    }
-    button {
-      cursor: pointer;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: #fff;
-      margin-top: 20px;
-      font-size: 0.9rem;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 10px;
-      text-align: center;
-    }
-  </style>
+  }
+
+  async function chargeUser(targetUid, currentBalance) {
+    const amount = parseInt(document.getElementById("chargeAmount").value);
+    if(!amount || amount <= 0) return alert("ادخل مبلغ صالح!");
+
+    const adminUid = auth.currentUser.uid;
+    const adminSnap = await getDoc(doc(db, "users", adminUid));
+    const adminBalance = adminSnap.data().balance;
+
+    if(auth.currentUser.email !== "uusu.06@gmail.com") return alert("غير مسموح!");
+    if(adminBalance < amount) return alert("رصيد المسؤول غير كافٍ!");
+
+    await updateDoc(doc(db, "users", adminUid), { balance: adminBalance - amount });
+    await updateDoc(doc(db, "users", targetUid), { balance: currentBalance + amount });
+
+    alert("تم الشحن بنجاح!");
+    document.getElementById("modal").style.display = "none";
+    loadUserData(adminUid, auth.currentUser.email);
+  }
+
+  function logout() {
+    signOut(auth).then(() => {
+      document.getElementById("authPanel").style.display = "block";
+      document.getElementById("userPanel").style.display = "none";
+      document.getElementById("topBar").style.display = "none";
+      document.getElementById("adminPanel").style.display = "none";
+    });
+  }
+
+  window.login = login;
+  window.register = register;
+  window.searchUser = searchUser;
+  window.chargeUser = chargeUser;
+  window.logout = logout;
+</script>
+
+<style>
+body { font-family: Cairo, sans-serif; text-align: center; padding: 20px; background:#f8f8f8;}
+input { margin: 5px; padding: 7px; border:1px solid #ccc; border-radius:5px; }
+button { padding: 7px 15px; margin-top: 5px; border:none; border-radius:5px; background:#3498db; color:#fff; cursor:pointer;}
+button:hover{background:#2980b9;}
+#adminPanel { display: none; margin-top: 20px; border: 1px solid #ccc; padding: 10px; background:#fff; border-radius:10px; }
+
+#topBar {
+  display:none;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(90deg,#2980b9,#6dd5fa);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+#topBar span { margin: 0 10px; font-size: 16px; }
+.balance-badge { background: gold; color: #222; padding: 8px 15px; border-radius: 30px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+
+#nameContainer { display:inline-block; }
+#nameText { cursor: default; font-size:14px; color:#6c5ce7; font-weight:bold; }
+#editIcon { cursor:pointer; margin-left:5px; color:#888; }
+#nameInput { display:none; font-size:14px; padding:3px; border:1px solid #ccc; border-radius:5px; }
+#saveBtn { display:none; background:#27ae60; color:white; border:none; border-radius:5px; padding:3px 7px; cursor:pointer; }
+
+#modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
+#modalContent { background: #fff; padding: 20px; border-radius: 10px; min-width: 250px; }
+.loader { border: 6px solid #f3f3f3; border-top: 6px solid #3498db; border-radius: 50%; width: 40px; height: 40px; margin: auto; animation: spin 1s linear infinite; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>
 </head>
 <body>
 
-<header>تطبيق MicroPOS - نقطة البيع</header>
+<h1>متجر العملات الافتراضية</h1>
 
-<div id="mainMenu" class="container">
-  <div class="card" onclick="showProducts()">
-    <img src="https://img.icons8.com/dusk/64/product.png" alt="المنتجات" />
-    <div class="card-title">المنتجات</div>
-  </div>
-  <div class="card" onclick="showClients()">
-    <img src="https://img.icons8.com/dusk/64/conference-call.png" alt="العملاء" />
-    <div class="card-title">العملاء</div>
-  </div>
-  <div class="card" onclick="showSales()">
-    <img src="https://img.icons8.com/dusk/64/shopping-cart.png" alt="المبيعات" />
-    <div class="card-title">المبيعات</div>
-  </div>
-  <div class="card" onclick="showReports()">
-    <img src="https://img.icons8.com/dusk/64/combo-chart.png" alt="التقارير" />
-    <div class="card-title">التقارير</div>
-  </div>
-  <div class="card" onclick="alert('صفحة الإعدادات')">
-    <img src="https://img.icons8.com/dusk/64/settings.png" alt="الإعدادات" />
-    <div class="card-title">الإعدادات</div>
-  </div>
-  <div class="card" onclick="showInventory()">
-    <img src="https://img.icons8.com/dusk/64/box.png" alt="المخزون" />
-    <div class="card-title">المخزون</div>
-  </div>
+<div id="topBar">
+  <span><b>المعرف:</b> <span id="displayCode">------</span></span>
+  <span id="nameContainer">
+    <b>الاسم:</b>
+    <span id="nameText">مستخدم</span>
+    <span id="editIcon">✏️</span>
+    <input type="text" id="nameInput">
+    <button id="saveBtn">✔</button>
+  </span>
+  <span class="balance-badge"><span id="displayBalance">0</span>$</span>
 </div>
 
-<!-- قسم المخزون -->
-<div id="inventorySection">
-  <button onclick="goBack()">الرجوع للقائمة الرئيسية</button>
-  <h2>إضافة جهاز للمخزن</h2>
-  <input type="text" id="name" placeholder="اسم الجهاز الكامل" list="suggestions" autocomplete="off">
-  <datalist id="suggestions"></datalist>
-  <input type="text" id="type" placeholder="النوع">
-  <input type="text" id="ram" placeholder="الرام">
-  <input type="text" id="storage" placeholder="الذاكرة">
-  <input type="number" id="qty" placeholder="الكمية" min="1">
-  <button onclick="addPhone()">إضافة</button>
-  <table>
-    <thead><tr><th>الشركة</th><th>النوع</th><th>الرام</th><th>الذاكرة</th><th>الكمية</th></tr></thead>
-    <tbody id="stockBody"></tbody>
-  </table>
+<div id="authPanel">
+  <h3>تسجيل الدخول</h3>
+  <input type="email" id="loginEmail" placeholder="البريد الإلكتروني"><br>
+  <input type="password" id="loginPass" placeholder="كلمة المرور"><br>
+  <button onclick="login(loginEmail.value, loginPass.value)">تسجيل الدخول</button>
+  <hr>
+  <h3>إنشاء حساب</h3>
+  <input type="email" id="regEmail" placeholder="البريد الإلكتروني"><br>
+  <input type="password" id="regPass" placeholder="كلمة المرور"><br>
+  <button onclick="register(regEmail.value, regPass.value)">إنشاء الحساب</button>
 </div>
 
-<!-- قسم المبيعات -->
-<div id="salesSection">
-  <button onclick="goBack()">الرجوع للقائمة الرئيسية</button>
-  <h2>بيع جهاز</h2>
-  <input type="text" id="sellName" placeholder="اسم الشركة" list="nameSuggestions">
-  <datalist id="nameSuggestions"></datalist>
-  <input type="text" id="sellType" placeholder="النوع">
-  <input type="text" id="sellRam" placeholder="الرام">
-  <input type="text" id="sellStorage" placeholder="الذاكرة">
-  <input type="number" id="sellQty" placeholder="الكمية" min="1">
-  <button onclick="sellPhone()">بيع</button>
-  <table>
-    <thead><tr><th>الشركة</th><th>النوع</th><th>الرام</th><th>الذاكرة</th><th>الكمية المباعة</th></tr></thead>
-    <tbody id="salesBody"></tbody>
-  </table>
+<div id="userPanel" style="display:none; margin-top:20px;">
+  <h3>مرحبًا بك في المتجر 🎉</h3>
+  <button onclick="logout()">تسجيل الخروج</button>
 </div>
 
-<!-- قسم التقارير -->
-<div id="reportsSection">
-  <button onclick="goBack()">الرجوع للقائمة الرئيسية</button>
-  <h2>الإحصائيات</h2>
-  <div id="statsContent" style="background:#fff; padding: 15px; border-radius: 10px;"></div>
+<div id="adminPanel">
+  <h3>لوحة المسؤول</h3>
+  <h4 id="adminBalance"></h4>
+  <input type="text" id="targetInput" placeholder="ادخل البريد أو الكود"><br>
+  <button onclick="searchUser(targetInput.value)">بحث عن المستخدم</button>
 </div>
 
-<!-- قسم المنتجات -->
-<div id="productsSection">
-  <button onclick="goBack()">الرجوع للقائمة الرئيسية</button>
-  <h2>صفحة المنتجات</h2>
-  <p>هنا يمكن إدارة المنتجات المستقبلية مثل الإكسسوارات وغيرها.</p>
+<div id="modal">
+  <div id="modalContent"></div>
 </div>
-
-<!-- قسم العملاء -->
-<div id="clientsSection">
-  <button onclick="goBack()">الرجوع للقائمة الرئيسية</button>
-  <h2>صفحة العملاء</h2>
-  <p>هنا يمكن إضافة العملاء وعرض معلوماتهم لاحقاً.</p>
-</div>
-
-<script>
-  let inventory = JSON.parse(localStorage.getItem("inventory")) || [];
-  let sales = JSON.parse(localStorage.getItem("sales")) || [];
-
-  function showInventory() {
-    hideAllSections();
-    document.getElementById("inventorySection").style.display = "block";
-    renderStock();
-  }
-
-  function showSales() {
-    hideAllSections();
-    document.getElementById("salesSection").style.display = "block";
-    renderSalesTable();
-  }
-
-  function showReports() {
-    hideAllSections();
-    document.getElementById("reportsSection").style.display = "block";
-    renderStatistics();
-  }
-
-  function showProducts() {
-    hideAllSections();
-    document.getElementById("productsSection").style.display = "block";
-  }
-
-  function showClients() {
-    hideAllSections();
-    document.getElementById("clientsSection").style.display = "block";
-  }
-
-  function goBack() {
-    hideAllSections();
-    document.getElementById("mainMenu").style.display = "grid";
-  }
-
-  function hideAllSections() {
-    ["mainMenu", "inventorySection", "salesSection", "reportsSection", "productsSection", "clientsSection"]
-    .forEach(id => document.getElementById(id).style.display = "none");
-  }
-
-  function addPhone() {
-    const name = document.getElementById("name").value.trim();
-    const type = document.getElementById("type").value.trim();
-    const ram = document.getElementById("ram").value.trim();
-    const storageVal = document.getElementById("storage").value.trim();
-    const qty = Number(document.getElementById("qty").value.trim());
-
-    if (!name || !type || !ram || !storageVal || qty <= 0) return alert("يرجى ملء جميع الحقول");
-
-    const index = inventory.findIndex(p => p.name === name && p.type === type && p.ram === ram && p.storage === storageVal);
-    if (index > -1) inventory[index].qty += qty;
-    else inventory.push({ name, type, ram, storage: storageVal, qty });
-
-    localStorage.setItem("inventory", JSON.stringify(inventory));
-    renderStock();
-    clearInputs();
-  }
-
-  function deletePhone(i) {
-    inventory.splice(i, 1);
-    localStorage.setItem("inventory", JSON.stringify(inventory));
-    renderStock();
-  }
-
-  function renderStock() {
-    const tbody = document.getElementById("stockBody");
-    tbody.innerHTML = "";
-    const sorted = [...inventory].sort((a, b) => a.name.localeCompare(b.name));
-    sorted.forEach((item, index) => {
-      const tr = document.createElement("tr");
-      const tdName = document.createElement("td");
-      tdName.textContent = item.name;
-      tdName.style.cursor = "pointer";
-      tdName.onclick = () => {
-        const btn = document.createElement("button");
-        btn.textContent = "🗑 حذف";
-        btn.style.background = "red";
-        btn.style.color = "white";
-        btn.style.border = "none";
-        btn.style.padding = "5px 10px";
-        btn.style.borderRadius = "5px";
-        btn.onclick = e => {
-          e.stopPropagation();
-          deletePhone(index);
-        };
-        tdName.innerHTML = "";
-        tdName.appendChild(btn);
-      };
-      tr.appendChild(tdName);
-      tr.innerHTML += `<td>${item.type}</td><td>${item.ram}</td><td>${item.storage}</td><td>${item.qty}</td>`;
-      tbody.appendChild(tr);
-    });
-    updateSuggestions();
-  }
-
-  function updateSuggestions() {
-    const datalist = document.getElementById("suggestions");
-    datalist.innerHTML = "";
-    const unique = [...new Set(inventory.map(p => `${p.name}|${p.type}|${p.ram}|${p.storage}`))];
-    unique.forEach(entry => {
-      const [name, type, ram, storageVal] = entry.split("|");
-      const option = document.createElement("option");
-      option.value = `${name} - ${type} - ${ram} - ${storageVal}`;
-      datalist.appendChild(option);
-    });
-  }
-
-  document.getElementById("name").addEventListener("change", function () {
-    const parts = this.value.split(" - ");
-    if (parts.length === 4) {
-      document.getElementById("name").value = parts[0];
-      document.getElementById("type").value = parts[1];
-      document.getElementById("ram").value = parts[2];
-      document.getElementById("storage").value = parts[3];
-    }
-  });
-
-  function clearInputs() {
-    ["name", "type", "ram", "storage", "qty"].forEach(id => document.getElementById(id).value = "");
-  }
-
-  function sellPhone() {
-    const name = document.getElementById("sellName").value.trim();
-    const type = document.getElementById("sellType").value.trim();
-    const ram = document.getElementById("sellRam").value.trim();
-    const storageVal = document.getElementById("sellStorage").value.trim();
-    const qty = Number(document.getElementById("sellQty").value.trim());
-
-    if (!name || !type || !ram || !storageVal || qty <= 0) return alert("يرجى ملء جميع الحقول");
-
-    const idx = inventory.findIndex(p => p.name === name && p.type === type && p.ram === ram && p.storage === storageVal);
-    if (idx === -1) return alert("الجهاز غير موجود في المخزن");
-    if (inventory[idx].qty < qty) return alert("الكمية غير متوفرة");
-
-    inventory[idx].qty -= qty;
-    if (inventory[idx].qty === 0) inventory.splice(idx, 1);
-    localStorage.setItem("inventory", JSON.stringify(inventory));
-    renderStock();
-
-    const saleIdx = sales.findIndex(s => s.name === name && s.type === type && s.ram === ram && s.storage === storageVal);
-    if (saleIdx > -1) sales[saleIdx].qty += qty;
-    else sales.push({ name, type, ram, storage: storageVal, qty });
-
-    localStorage.setItem("sales", JSON.stringify(sales));
-    renderSalesTable();
-    clearSellInputs();
-  }
-
-  function clearSellInputs() {
-    ["sellName", "sellType", "sellRam", "sellStorage", "sellQty"].forEach(id => document.getElementById(id).value = "");
-  }
-
-  function renderSalesTable() {
-    const tbody = document.getElementById("salesBody");
-    tbody.innerHTML = "";
-    sales.forEach(s => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${s.name}</td><td>${s.type}</td><td>${s.ram}</td><td>${s.storage}</td><td>${s.qty}</td>`;
-      tbody.appendChild(tr);
-    });
-  }
-
-  document.getElementById("sellName").addEventListener("input", function () {
-    const input = this.value.trim().toLowerCase();
-    const datalist = document.getElementById("nameSuggestions");
-    datalist.innerHTML = "";
-    if (input.length === 0) return;
-    const suggestions = inventory.filter(p => p.name.toLowerCase().includes(input));
-    const unique = [...new Set(suggestions.map(p => `${p.name}|${p.type}|${p.ram}|${p.storage}`))];
-    unique.forEach(entry => {
-      const [name, type, ram, storageVal] = entry.split("|");
-      const option = document.createElement("option");
-      option.value = `${name} - ${type} - ${ram} - ${storageVal}`;
-      datalist.appendChild(option);
-    });
-  });
-
-  document.getElementById("sellName").addEventListener("change", function () {
-    const parts = this.value.split(" - ");
-    if (parts.length === 4) {
-      this.value = parts[0];
-      document.getElementById("sellType").value = parts[1];
-      document.getElementById("sellRam").value = parts[2];
-      document.getElementById("sellStorage").value = parts[3];
-    }
-  });
-
-  function renderStatistics() {
-    const statsDiv = document.getElementById("statsContent");
-    const uniqueStockTypes = inventory.length;
-    const totalStockQty = inventory.reduce((acc, item) => acc + item.qty, 0);
-    const uniqueSoldTypes = sales.length;
-    const totalSoldQty = sales.reduce((acc, s) => acc + s.qty, 0);
-    statsDiv.innerHTML = `
-      <p>عدد أنواع الأجهزة في المخزون: <strong>${uniqueStockTypes}</strong></p>
-      <p>إجمالي كمية الأجهزة في المخزون: <strong>${totalStockQty}</strong></p>
-      <p>عدد أنواع الأجهزة المباعة: <strong>${uniqueSoldTypes}</strong></p>
-      <p>إجمالي كمية الأجهزة المباعة: <strong>${totalSoldQty}</strong></p>
-    `;
-  }
-
-  window.onload = () => {
-    renderStock();
-    renderSalesTable();
-  };
-</script>
 
 </body>
 </html>
