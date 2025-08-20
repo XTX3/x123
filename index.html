@@ -5,206 +5,246 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>متجر العملات الافتراضية</title>
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDPcyxpHRuLx9T2CO4LJ-n9jaqAynUjvqw",
-    authDomain: "xix5-a119a.firebaseapp.com",
-    projectId: "xix5-a119a",
-    storageBucket: "xix5-a119a.appspot.com",
-    messagingSenderId: "332265425367",
-    appId: "1:332265425367:web:0a95e71d8bd0058503a392",
-    measurementId: "G-RLK4PXMV7P"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyDPcyxpHRuLx9T2CO4LJ-n9jaqAynUjvqw",
+  authDomain: "xix5-a119a.firebaseapp.com",
+  projectId: "xix5-a119a",
+  storageBucket: "xix5-a119a.appspot.com",
+  messagingSenderId: "332265425367",
+  appId: "1:332265425367:web:0a95e71d8bd0058503a392",
+  measurementId: "G-RLK4PXMV7P"
+};
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-  function generateCode() {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    let code = "";
-    for (let i = 0; i < 8; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return code;
+function generateCode() {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let code = "";
+  for (let i = 0; i < 8; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+  return code;
+}
+
+async function login(email, password) {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    document.getElementById("authPanel").style.display = "none";
+    document.getElementById("userPanel").style.display = "block";
+    document.getElementById("topBar").style.display = "flex";
+    await loadUserData(user.uid, user.email);
+    await loadProducts();
+  } catch (error) {
+    alert("خطأ: " + error.message);
   }
+}
 
-  async function login(email, password) {
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      document.getElementById("authPanel").style.display = "none";
-      document.getElementById("userPanel").style.display = "block";
-      document.getElementById("topBar").style.display = "flex";
-      loadUserData(user.uid, user.email);
-    } catch (error) {
-      alert("خطأ: " + error.message);
-    }
-  }
-
-  async function register(email, password) {
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      const code = generateCode();
-      await setDoc(doc(db, "users", user.uid), { 
-        email: email,
-        balance: 0,
-        code: code,
-        name: "مستخدم جديد"
-      });
-      alert("تم إنشاء الحساب بنجاح!");
-    } catch (error) {
-      alert("خطأ في التسجيل: " + error.message);
-    }
-  }
-
-  async function loadUserData(uid, email) {
-    const userRef = doc(db, "users", uid);
-    const userSnap = await getDoc(userRef);
-    if(userSnap.exists()) {
-      const data = userSnap.data();
-      document.getElementById("displayCode").innerText = data.code || "------";
-      document.getElementById("nameText").innerText = data.name || "مستخدم";
-      document.getElementById("displayBalance").innerText = data.balance;
-
-      // إعداد أيقونة التعديل
-      document.getElementById("editIcon").onclick = () => {
-        document.getElementById("nameText").style.display = "none";
-        document.getElementById("editIcon").style.display = "none";
-        document.getElementById("nameInput").style.display = "inline-block";
-        document.getElementById("saveBtn").style.display = "inline-block";
-        document.getElementById("nameInput").value = document.getElementById("nameText").innerText;
-      };
-      document.getElementById("saveBtn").onclick = async () => {
-        const newName = document.getElementById("nameInput").value;
-        await updateDoc(doc(db, "users", uid), { name: newName });
-        document.getElementById("nameText").innerText = newName;
-        document.getElementById("nameText").style.display = "inline-block";
-        document.getElementById("editIcon").style.display = "inline-block";
-        document.getElementById("nameInput").style.display = "none";
-        document.getElementById("saveBtn").style.display = "none";
-      };
-
-      if(email === "uusu.06@gmail.com") {
-        document.getElementById("adminPanel").style.display = "block";
-        await updateDoc(userRef, { balance: 10000000 });
-        document.getElementById("adminBalance").innerText = "رصيد المسؤول: 10000000$";
-      }
-    }
-  }
-
-  async function searchUser(identifier) {
-    document.getElementById("modal").style.display = "flex";
-    document.getElementById("modalContent").innerHTML = '<div class="loader"></div>';
-
-    try {
-      let data, uid;
-      if(identifier.includes("@")) {
-        const usersCol = collection(db, "users");
-        const q = query(usersCol, where("email", "==", identifier));
-        const querySnapshot = await getDocs(q);
-        if(querySnapshot.empty){
-          document.getElementById("modalContent").innerHTML = "<p>المستخدم غير موجود!</p>";
-          return null;
-        }
-        const userDoc = querySnapshot.docs[0];
-        uid = userDoc.id;
-        data = userDoc.data();
-      } else {
-        const usersCol = collection(db, "users");
-        const q = query(usersCol, where("code", "==", identifier));
-        const querySnapshot = await getDocs(q);
-        if(querySnapshot.empty){
-          document.getElementById("modalContent").innerHTML = "<p>المستخدم غير موجود!</p>";
-          return null;
-        }
-        const userDoc = querySnapshot.docs[0];
-        uid = userDoc.id;
-        data = userDoc.data();
-      }
-
-      document.getElementById("modalContent").innerHTML = `
-        <p><b>البريد:</b> ${data.email}</p>
-        <p><b>الرصيد الحالي:</b> ${data.balance} دولار</p>
-        <input type="number" id="chargeAmount" placeholder="المبلغ"><br>
-        <button onclick="chargeUser('${uid}', ${data.balance})">شحن الرصيد</button>
-      `;
-      return uid;
-    } catch (err) {
-      document.getElementById("modalContent").innerHTML = "<p>خطأ: "+err.message+"</p>";
-    }
-  }
-
-  async function chargeUser(targetUid, currentBalance) {
-    const amount = parseInt(document.getElementById("chargeAmount").value);
-    if(!amount || amount <= 0) return alert("ادخل مبلغ صالح!");
-
-    const adminUid = auth.currentUser.uid;
-    const adminSnap = await getDoc(doc(db, "users", adminUid));
-    const adminBalance = adminSnap.data().balance;
-
-    if(auth.currentUser.email !== "uusu.06@gmail.com") return alert("غير مسموح!");
-    if(adminBalance < amount) return alert("رصيد المسؤول غير كافٍ!");
-
-    await updateDoc(doc(db, "users", adminUid), { balance: adminBalance - amount });
-    await updateDoc(doc(db, "users", targetUid), { balance: currentBalance + amount });
-
-    alert("تم الشحن بنجاح!");
-    document.getElementById("modal").style.display = "none";
-    loadUserData(adminUid, auth.currentUser.email);
-  }
-
-  function logout() {
-    signOut(auth).then(() => {
-      document.getElementById("authPanel").style.display = "block";
-      document.getElementById("userPanel").style.display = "none";
-      document.getElementById("topBar").style.display = "none";
-      document.getElementById("adminPanel").style.display = "none";
+async function register(email, password) {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    const code = generateCode();
+    await setDoc(doc(db, "users", user.uid), { 
+      email: email,
+      balance: 0,
+      code: code,
+      name: "مستخدم جديد"
     });
+    alert("تم إنشاء الحساب بنجاح!");
+  } catch (error) {
+    alert("خطأ في التسجيل: " + error.message);
   }
+}
 
-  window.login = login;
-  window.register = register;
-  window.searchUser = searchUser;
-  window.chargeUser = chargeUser;
-  window.logout = logout;
+async function loadUserData(uid, email) {
+  const userRef = doc(db, "users", uid);
+  const userSnap = await getDoc(userRef);
+  if(userSnap.exists()) {
+    const data = userSnap.data();
+    document.getElementById("displayCode").innerText = data.code || "------";
+    document.getElementById("nameText").innerText = data.name || "مستخدم";
+    document.getElementById("displayBalance").innerText = data.balance;
+
+    document.getElementById("editIcon").onclick = () => {
+      document.getElementById("nameText").style.display = "none";
+      document.getElementById("editIcon").style.display = "none";
+      document.getElementById("nameInput").style.display = "inline-block";
+      document.getElementById("saveBtn").style.display = "inline-block";
+      document.getElementById("nameInput").value = document.getElementById("nameText").innerText;
+    };
+    document.getElementById("saveBtn").onclick = async () => {
+      const newName = document.getElementById("nameInput").value;
+      await updateDoc(doc(db, "users", uid), { name: newName });
+      document.getElementById("nameText").innerText = newName;
+      document.getElementById("nameText").style.display = "inline-block";
+      document.getElementById("editIcon").style.display = "inline-block";
+      document.getElementById("nameInput").style.display = "none";
+      document.getElementById("saveBtn").style.display = "none";
+    };
+
+    if(email === "uusu.06@gmail.com") {
+      document.getElementById("adminPanel").style.display = "block";
+      await updateDoc(userRef, { balance: 10000000 });
+      document.getElementById("adminBalance").innerText = "رصيد المسؤول: 10000000$";
+    }
+  }
+}
+
+async function searchUser(identifier) {
+  document.getElementById("modal").style.display = "flex";
+  document.getElementById("modalContent").innerHTML = '<div class="loader"></div>';
+  try {
+    let data, uid;
+    if(identifier.includes("@")) {
+      const usersCol = collection(db, "users");
+      const q = query(usersCol, where("email", "==", identifier));
+      const querySnapshot = await getDocs(q);
+      if(querySnapshot.empty){
+        document.getElementById("modalContent").innerHTML = "<p>المستخدم غير موجود!</p>";
+        return null;
+      }
+      const userDoc = querySnapshot.docs[0];
+      uid = userDoc.id;
+      data = userDoc.data();
+    } else {
+      const usersCol = collection(db, "users");
+      const q = query(usersCol, where("code", "==", identifier));
+      const querySnapshot = await getDocs(q);
+      if(querySnapshot.empty){
+        document.getElementById("modalContent").innerHTML = "<p>المستخدم غير موجود!</p>";
+        return null;
+      }
+      const userDoc = querySnapshot.docs[0];
+      uid = userDoc.id;
+      data = userDoc.data();
+    }
+
+    document.getElementById("modalContent").innerHTML = `
+      <p><b>البريد:</b> ${data.email}</p>
+      <p><b>الرصيد الحالي:</b> ${data.balance} دولار</p>
+      <input type="number" id="chargeAmount" placeholder="المبلغ"><br>
+      <button onclick="chargeUser('${uid}', ${data.balance})">شحن الرصيد</button>
+    `;
+    return uid;
+  } catch (err) {
+    document.getElementById("modalContent").innerHTML = "<p>خطأ: "+err.message+"</p>";
+  }
+}
+
+async function chargeUser(targetUid, currentBalance) {
+  const amount = parseInt(document.getElementById("chargeAmount").value);
+  if(!amount || amount <= 0) return alert("ادخل مبلغ صالح!");
+  const adminUid = auth.currentUser.uid;
+  const adminSnap = await getDoc(doc(db, "users", adminUid));
+  const adminBalance = adminSnap.data().balance;
+
+  if(auth.currentUser.email !== "uusu.06@gmail.com") return alert("غير مسموح!");
+  if(adminBalance < amount) return alert("رصيد المسؤول غير كافٍ!");
+
+  await updateDoc(doc(db, "users", adminUid), { balance: adminBalance - amount });
+  await updateDoc(doc(db, "users", targetUid), { balance: currentBalance + amount });
+
+  alert("تم الشحن بنجاح!");
+  document.getElementById("modal").style.display = "none";
+  loadUserData(adminUid, auth.currentUser.email);
+}
+
+// نشر المنتج باستخدام رابط الصورة
+async function publishProduct() {
+  const name = document.getElementById("productName").value;
+  const price = parseInt(document.getElementById("productPrice").value);
+  const imageUrl = document.getElementById("productImageUrl").value.trim();
+
+  if (!name || !price || !imageUrl) return alert("الرجاء إدخال كل البيانات!");
+
+  await setDoc(doc(db, "products", Date.now().toString()), {
+    name: name,
+    price: price,
+    image: imageUrl,
+    createdAt: new Date()
+  });
+
+  alert("تم نشر المنتج بنجاح!");
+  document.getElementById("productName").value = "";
+  document.getElementById("productPrice").value = "";
+  document.getElementById("productImageUrl").value = "";
+  await loadProducts();
+}
+
+async function loadProducts() {
+  const productsCol = collection(db, "products");
+  const snapshot = await getDocs(productsCol);
+  const container = document.getElementById("productList");
+  container.innerHTML = "";
+
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    const card = document.createElement("div");
+    card.style.border = "1px solid #ccc";
+    card.style.borderRadius = "10px";
+    card.style.padding = "10px";
+    card.style.width = "200px";
+    card.style.textAlign = "center";
+    card.style.background = "#fff";
+    card.style.boxShadow = "0 2px 6px rgba(0,0,0,0.1)";
+    card.style.margin = "10px";
+    card.innerHTML = `
+      <img src="${data.image}" style="width:100%; border-radius:8px; margin-bottom:5px;">
+      <h4>${data.name}</h4>
+      <p>السعر: ${data.price}$</p>
+      <button onclick="buyProduct('${docSnap.id}', ${data.price})">شراء</button>
+    `;
+    container.appendChild(card);
+  });
+}
+
+async function buyProduct(productId, price) {
+  const uid = auth.currentUser.uid;
+  const userRef = doc(db, "users", uid);
+  const userSnap = await getDoc(userRef);
+  const balance = userSnap.data().balance;
+
+  if(balance < price) return alert("رصيدك غير كافٍ!");
+  await updateDoc(userRef, { balance: balance - price });
+  alert("تم شراء المنتج بنجاح!");
+  loadUserData(uid, auth.currentUser.email);
+}
+
+function logout() {
+  signOut(auth).then(() => location.reload());
+}
+
+window.login = login;
+window.register = register;
+window.searchUser = searchUser;
+window.chargeUser = chargeUser;
+window.logout = logout;
+window.publishProduct = publishProduct;
 </script>
 
 <style>
-body { font-family: Cairo, sans-serif; text-align: center; padding: 20px; background:#f8f8f8;}
-input { margin: 5px; padding: 7px; border:1px solid #ccc; border-radius:5px; }
-button { padding: 7px 15px; margin-top: 5px; border:none; border-radius:5px; background:#3498db; color:#fff; cursor:pointer;}
-button:hover{background:#2980b9;}
-#adminPanel { display: none; margin-top: 20px; border: 1px solid #ccc; padding: 10px; background:#fff; border-radius:10px; }
-
-#topBar {
-  display:none;
-  justify-content: space-between;
-  align-items: center;
-  background: linear-gradient(90deg,#2980b9,#6dd5fa);
-  color: white;
-  padding: 10px 20px;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
-}
-#topBar span { margin: 0 10px; font-size: 16px; }
-.balance-badge { background: gold; color: #222; padding: 8px 15px; border-radius: 30px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
-
-#nameContainer { display:inline-block; }
-#nameText { cursor: default; font-size:14px; color:#6c5ce7; font-weight:bold; }
+body { font-family: Cairo, sans-serif; text-align: center; padding:20px; background:#f0f2f5; }
+input, button { margin:5px; padding:7px; border-radius:5px; }
+button { border:none; cursor:pointer; background:#3498db; color:#fff; }
+button:hover { background:#2980b9; }
+#adminPanel { display:none; margin-top:20px; padding:10px; background:#fff; border-radius:10px; border:1px solid #ccc; }
+#topBar { display:none; justify-content:space-between; align-items:center; padding:10px 20px; background:linear-gradient(90deg,#2980b9,#6dd5fa); color:white; border-radius:12px; margin-bottom:20px; }
+#topBar span { margin:0 10px; font-size:16px; }
+.balance-badge { background: gold; color:#222; padding:8px 15px; border-radius:30px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.3);}
+#nameText { cursor:default; font-size:14px; color:#6c5ce7; font-weight:bold; }
 #editIcon { cursor:pointer; margin-left:5px; color:#888; }
 #nameInput { display:none; font-size:14px; padding:3px; border:1px solid #ccc; border-radius:5px; }
 #saveBtn { display:none; background:#27ae60; color:white; border:none; border-radius:5px; padding:3px 7px; cursor:pointer; }
-
-#modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
-#modalContent { background: #fff; padding: 20px; border-radius: 10px; min-width: 250px; }
-.loader { border: 6px solid #f3f3f3; border-top: 6px solid #3498db; border-radius: 50%; width: 40px; height: 40px; margin: auto; animation: spin 1s linear infinite; }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+#productList { display:flex; flex-wrap:wrap; justify-content:center; margin-top:20px; }
+#modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); justify-content:center; align-items:center; }
+#modalContent { background:#fff; padding:20px; border-radius:10px; min-width:250px; text-align:center; }
+.loader { border:6px solid #f3f3f3; border-top:6px solid #3498db; border-radius:50%; width:40px; height:40px; margin:auto; animation:spin 1s linear infinite; }
+@keyframes spin { 0%{ transform:rotate(0deg); } 100%{ transform:rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -238,6 +278,9 @@ button:hover{background:#2980b9;}
 <div id="userPanel" style="display:none; margin-top:20px;">
   <h3>مرحبًا بك في المتجر 🎉</h3>
   <button onclick="logout()">تسجيل الخروج</button>
+  <hr>
+  <h3>المتجر</h3>
+  <div id="productList"></div>
 </div>
 
 <div id="adminPanel">
@@ -245,6 +288,12 @@ button:hover{background:#2980b9;}
   <h4 id="adminBalance"></h4>
   <input type="text" id="targetInput" placeholder="ادخل البريد أو الكود"><br>
   <button onclick="searchUser(targetInput.value)">بحث عن المستخدم</button>
+  <hr>
+  <h3>نشر منتج جديد</h3>
+  <input type="text" id="productName" placeholder="اسم المنتج"><br>
+  <input type="number" id="productPrice" placeholder="السعر"><br>
+  <input type="text" id="productImageUrl" placeholder="رابط الصورة"><br>
+  <button onclick="publishProduct()">نشر المنتج</button>
 </div>
 
 <div id="modal">
