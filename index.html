@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MicroPOS - نقطة بيع</title>
+  <style>
+    body {
+      font-family: 'Tahoma', sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    header {
+      background-color: #4a90e2;
+      color: white;
+      padding: 1rem;
+      font-size: 1.5rem;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: 0.3s;
+      cursor: pointer;
+    }
+    .card:hover {
+      transform: scale(1.05);
+    }
+    .card img {
+      width: 50px;
+      margin-bottom: 10px;
+    }
+    .card-title {
+      font-size: 1.1rem;
+    }
+    #inventorySection, #salesSection, #reportsSection, #productsSection, #clientsSection {
+      display: none;
+      text-align: right;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+    input, button {
+      margin: 5px 0;
+      padding: 10px;
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 1rem;
+    }
+    button {
+      cursor: pointer;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      margin-top: 20px;
+      font-size: 0.9rem;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<header>تطبيق MicroPOS - نقطة البيع</header>
+
+<div id="mainMenu" class="container">
+  <div class="card" onclick="showProducts()">
+    <img src="https://img.icons8.com/dusk/64/product.png" alt="المنتجات" />
+    <div class="card-title">المنتجات</div>
+  </div>
+  <div class="card" onclick="showClients()">
+    <img src="https://img.icons8.com/dusk/64/conference-call.png" alt="العملاء" />
+    <div class="card-title">العملاء</div>
+  </div>
+  <div class="card" onclick="showSales()">
+    <img src="https://img.icons8.com/dusk/64/shopping-cart.png" alt="المبيعات" />
+    <div class="card-title">المبيعات</div>
+  </div>
+  <div class="card" onclick="showReports()">
+    <img src="https://img.icons8.com/dusk/64/combo-chart.png" alt="التقارير" />
+    <div class="card-title">التقارير</div>
+  </div>
+  <div class="card" onclick="alert('صفحة الإعدادات')">
+    <img src="https://img.icons8.com/dusk/64/settings.png" alt="الإعدادات" />
+    <div class="card-title">الإعدادات</div>
+  </div>
+  <div class="card" onclick="showInventory()">
+    <img src="https://img.icons8.com/dusk/64/box.png" alt="المخزون" />
+    <div class="card-title">المخزون</div>
+  </div>
+</div>
+
+<!-- قسم المخزون -->
+<div id="inventorySection">
+  <button onclick="goBack()">الرجوع للقائمة الرئيسية</button>
+  <h2>إضافة جهاز للمخزن</h2>
+  <input type="text" id="name" placeholder="اسم الجهاز الكامل" list="suggestions" autocomplete="off">
+  <datalist id="suggestions"></datalist>
+  <input type="text" id="type" placeholder="النوع">
+  <input type="text" id="ram" placeholder="الرام">
+  <input type="text" id="storage" placeholder="الذاكرة">
+  <input type="number" id="qty" placeholder="الكمية" min="1">
+  <button onclick="addPhone()">إضافة</button>
+  <table>
+    <thead><tr><th>الشركة</th><th>النوع</th><th>الرام</th><th>الذاكرة</th><th>الكمية</th></tr></thead>
+    <tbody id="stockBody"></tbody>
+  </table>
+</div>
+
+<!-- قسم المبيعات -->
+<div id="salesSection">
+  <button onclick="goBack()">الرجوع للقائمة الرئيسية</button>
+  <h2>بيع جهاز</h2>
+  <input type="text" id="sellName" placeholder="اسم الشركة" list="nameSuggestions">
+  <datalist id="nameSuggestions"></datalist>
+  <input type="text" id="sellType" placeholder="النوع">
+  <input type="text" id="sellRam" placeholder="الرام">
+  <input type="text" id="sellStorage" placeholder="الذاكرة">
+  <input type="number" id="sellQty" placeholder="الكمية" min="1">
+  <button onclick="sellPhone()">بيع</button>
+  <table>
+    <thead><tr><th>الشركة</th><th>النوع</th><th>الرام</th><th>الذاكرة</th><th>الكمية المباعة</th></tr></thead>
+    <tbody id="salesBody"></tbody>
+  </table>
+</div>
+
+<!-- قسم التقارير -->
+<div id="reportsSection">
+  <button onclick="goBack()">الرجوع للقائمة الرئيسية</button>
+  <h2>الإحصائيات</h2>
+  <div id="statsContent" style="background:#fff; padding: 15px; border-radius: 10px;"></div>
+</div>
+
+<!-- قسم المنتجات -->
+<div id="productsSection">
+  <button onclick="goBack()">الرجوع للقائمة الرئيسية</button>
+  <h2>صفحة المنتجات</h2>
+  <p>هنا يمكن إدارة المنتجات المستقبلية مثل الإكسسوارات وغيرها.</p>
+</div>
+
+<!-- قسم العملاء -->
+<div id="clientsSection">
+  <button onclick="goBack()">الرجوع للقائمة الرئيسية</button>
+  <h2>صفحة العملاء</h2>
+  <p>هنا يمكن إضافة العملاء وعرض معلوماتهم لاحقاً.</p>
+</div>
+
+<script>
+  let inventory = JSON.parse(localStorage.getItem("inventory")) || [];
+  let sales = JSON.parse(localStorage.getItem("sales")) || [];
+
+  function showInventory() {
+    hideAllSections();
+    document.getElementById("inventorySection").style.display = "block";
+    renderStock();
+  }
+
+  function showSales() {
+    hideAllSections();
+    document.getElementById("salesSection").style.display = "block";
+    renderSalesTable();
+  }
+
+  function showReports() {
+    hideAllSections();
+    document.getElementById("reportsSection").style.display = "block";
+    renderStatistics();
+  }
+
+  function showProducts() {
+    hideAllSections();
+    document.getElementById("productsSection").style.display = "block";
+  }
+
+  function showClients() {
+    hideAllSections();
+    document.getElementById("clientsSection").style.display = "block";
+  }
+
+  function goBack() {
+    hideAllSections();
+    document.getElementById("mainMenu").style.display = "grid";
+  }
+
+  function hideAllSections() {
+    ["mainMenu", "inventorySection", "salesSection", "reportsSection", "productsSection", "clientsSection"]
+    .forEach(id => document.getElementById(id).style.display = "none");
+  }
+
+  function addPhone() {
+    const name = document.getElementById("name").value.trim();
+    const type = document.getElementById("type").value.trim();
+    const ram = document.getElementById("ram").value.trim();
+    const storageVal = document.getElementById("storage").value.trim();
+    const qty = Number(document.getElementById("qty").value.trim());
+
+    if (!name || !type || !ram || !storageVal || qty <= 0) return alert("يرجى ملء جميع الحقول");
+
+    const index = inventory.findIndex(p => p.name === name && p.type === type && p.ram === ram && p.storage === storageVal);
+    if (index > -1) inventory[index].qty += qty;
+    else inventory.push({ name, type, ram, storage: storageVal, qty });
+
+    localStorage.setItem("inventory", JSON.stringify(inventory));
+    renderStock();
+    clearInputs();
+  }
+
+  function deletePhone(i) {
+    inventory.splice(i, 1);
+    localStorage.setItem("inventory", JSON.stringify(inventory));
+    renderStock();
+  }
+
+  function renderStock() {
+    const tbody = document.getElementById("stockBody");
+    tbody.innerHTML = "";
+    const sorted = [...inventory].sort((a, b) => a.name.localeCompare(b.name));
+    sorted.forEach((item, index) => {
+      const tr = document.createElement("tr");
+      const tdName = document.createElement("td");
+      tdName.textContent = item.name;
+      tdName.style.cursor = "pointer";
+      tdName.onclick = () => {
+        const btn = document.createElement("button");
+        btn.textContent = "🗑 حذف";
+        btn.style.background = "red";
+        btn.style.color = "white";
+        btn.style.border = "none";
+        btn.style.padding = "5px 10px";
+        btn.style.borderRadius = "5px";
+        btn.onclick = e => {
+          e.stopPropagation();
+          deletePhone(index);
+        };
+        tdName.innerHTML = "";
+        tdName.appendChild(btn);
+      };
+      tr.appendChild(tdName);
+      tr.innerHTML += `<td>${item.type}</td><td>${item.ram}</td><td>${item.storage}</td><td>${item.qty}</td>`;
+      tbody.appendChild(tr);
+    });
+    updateSuggestions();
+  }
+
+  function updateSuggestions() {
+    const datalist = document.getElementById("suggestions");
+    datalist.innerHTML = "";
+    const unique = [...new Set(inventory.map(p => `${p.name}|${p.type}|${p.ram}|${p.storage}`))];
+    unique.forEach(entry => {
+      const [name, type, ram, storageVal] = entry.split("|");
+      const option = document.createElement("option");
+      option.value = `${name} - ${type} - ${ram} - ${storageVal}`;
+      datalist.appendChild(option);
+    });
+  }
+
+  document.getElementById("name").addEventListener("change", function () {
+    const parts = this.value.split(" - ");
+    if (parts.length === 4) {
+      document.getElementById("name").value = parts[0];
+      document.getElementById("type").value = parts[1];
+      document.getElementById("ram").value = parts[2];
+      document.getElementById("storage").value = parts[3];
+    }
+  });
+
+  function clearInputs() {
+    ["name", "type", "ram", "storage", "qty"].forEach(id => document.getElementById(id).value = "");
+  }
+
+  function sellPhone() {
+    const name = document.getElementById("sellName").value.trim();
+    const type = document.getElementById("sellType").value.trim();
+    const ram = document.getElementById("sellRam").value.trim();
+    const storageVal = document.getElementById("sellStorage").value.trim();
+    const qty = Number(document.getElementById("sellQty").value.trim());
+
+    if (!name || !type || !ram || !storageVal || qty <= 0) return alert("يرجى ملء جميع الحقول");
+
+    const idx = inventory.findIndex(p => p.name === name && p.type === type && p.ram === ram && p.storage === storageVal);
+    if (idx === -1) return alert("الجهاز غير موجود في المخزن");
+    if (inventory[idx].qty < qty) return alert("الكمية غير متوفرة");
+
+    inventory[idx].qty -= qty;
+    if (inventory[idx].qty === 0) inventory.splice(idx, 1);
+    localStorage.setItem("inventory", JSON.stringify(inventory));
+    renderStock();
+
+    const saleIdx = sales.findIndex(s => s.name === name && s.type === type && s.ram === ram && s.storage === storageVal);
+    if (saleIdx > -1) sales[saleIdx].qty += qty;
+    else sales.push({ name, type, ram, storage: storageVal, qty });
+
+    localStorage.setItem("sales", JSON.stringify(sales));
+    renderSalesTable();
+    clearSellInputs();
+  }
+
+  function clearSellInputs() {
+    ["sellName", "sellType", "sellRam", "sellStorage", "sellQty"].forEach(id => document.getElementById(id).value = "");
+  }
+
+  function renderSalesTable() {
+    const tbody = document.getElementById("salesBody");
+    tbody.innerHTML = "";
+    sales.forEach(s => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${s.name}</td><td>${s.type}</td><td>${s.ram}</td><td>${s.storage}</td><td>${s.qty}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  document.getElementById("sellName").addEventListener("input", function () {
+    const input = this.value.trim().toLowerCase();
+    const datalist = document.getElementById("nameSuggestions");
+    datalist.innerHTML = "";
+    if (input.length === 0) return;
+    const suggestions = inventory.filter(p => p.name.toLowerCase().includes(input));
+    const unique = [...new Set(suggestions.map(p => `${p.name}|${p.type}|${p.ram}|${p.storage}`))];
+    unique.forEach(entry => {
+      const [name, type, ram, storageVal] = entry.split("|");
+      const option = document.createElement("option");
+      option.value = `${name} - ${type} - ${ram} - ${storageVal}`;
+      datalist.appendChild(option);
+    });
+  });
+
+  document.getElementById("sellName").addEventListener("change", function () {
+    const parts = this.value.split(" - ");
+    if (parts.length === 4) {
+      this.value = parts[0];
+      document.getElementById("sellType").value = parts[1];
+      document.getElementById("sellRam").value = parts[2];
+      document.getElementById("sellStorage").value = parts[3];
+    }
+  });
+
+  function renderStatistics() {
+    const statsDiv = document.getElementById("statsContent");
+    const uniqueStockTypes = inventory.length;
+    const totalStockQty = inventory.reduce((acc, item) => acc + item.qty, 0);
+    const uniqueSoldTypes = sales.length;
+    const totalSoldQty = sales.reduce((acc, s) => acc + s.qty, 0);
+    statsDiv.innerHTML = `
+      <p>عدد أنواع الأجهزة في المخزون: <strong>${uniqueStockTypes}</strong></p>
+      <p>إجمالي كمية الأجهزة في المخزون: <strong>${totalStockQty}</strong></p>
+      <p>عدد أنواع الأجهزة المباعة: <strong>${uniqueSoldTypes}</strong></p>
+      <p>إجمالي كمية الأجهزة المباعة: <strong>${totalSoldQty}</strong></p>
+    `;
+  }
+
+  window.onload = () => {
+    renderStock();
+    renderSalesTable();
+  };
+</script>
+
+</body>
+</html>
