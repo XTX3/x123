@@ -55,7 +55,9 @@ async function register(email, password) {
       code: code,
       name: "مستخدم جديد"
     });
-    alert("تم إنشاء الحساب بنجاح!");
+    // اظهار نافذة منبثقة عند انشاء الحساب
+    document.getElementById("modal").style.display = "flex";
+    document.getElementById("modalContent").innerHTML = "<p>✔ تم إنشاء حسابك بنجاح!</p>";
   } catch (error) {
     alert("خطأ في التسجيل: " + error.message);
   }
@@ -219,6 +221,16 @@ function logout() {
   signOut(auth).then(() => location.reload());
 }
 
+// فتح وغلق القائمة الجانبية
+window.onload = () => {
+  const sideMenu = document.getElementById("sideMenu");
+  const menuBtn = document.getElementById("menuBtn");
+  const closeMenu = document.getElementById("closeMenu");
+
+  menuBtn.onclick = () => sideMenu.style.right = "0";
+  closeMenu.onclick = () => sideMenu.style.right = "-250px";
+};
+
 window.login = login;
 window.register = register;
 window.searchUser = searchUser;
@@ -245,6 +257,30 @@ button:hover { background:#2980b9; }
 #modalContent { background:#fff; padding:20px; border-radius:10px; min-width:250px; text-align:center; }
 .loader { border:6px solid #f3f3f3; border-top:6px solid #3498db; border-radius:50%; width:40px; height:40px; margin:auto; animation:spin 1s linear infinite; }
 @keyframes spin { 0%{ transform:rotate(0deg); } 100%{ transform:rotate(360deg); } }
+
+/* القائمة الجانبية */
+#menuBtn { cursor:pointer; font-size:24px; display:inline-block; margin-left:10px; }
+#sideMenu {
+  position: fixed;
+  top: 0;
+  right: -250px; 
+  width: 250px;
+  height: 100%;
+  background: #fff;
+  box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+  padding: 20px;
+  transition: 0.3s;
+  z-index: 1000;
+}
+#sideMenu ul { list-style:none; padding:0; }
+#sideMenu ul li { margin:15px 0; }
+#sideMenu ul li a { text-decoration:none; color:#3498db; }
+#closeMenu {
+  cursor:pointer;
+  font-size:24px;
+  margin-bottom:10px;
+  text-align:left;
+}
 </style>
 </head>
 <body>
@@ -252,6 +288,7 @@ button:hover { background:#2980b9; }
 <h1>متجر العملات الافتراضية</h1>
 
 <div id="topBar">
+  <div id="menuBtn">☰</div>
   <span><b>المعرف:</b> <span id="displayCode">------</span></span>
   <span id="nameContainer">
     <b>الاسم:</b>
@@ -263,16 +300,23 @@ button:hover { background:#2980b9; }
   <span class="balance-badge"><span id="displayBalance">0</span>$</span>
 </div>
 
+<!-- القائمة الجانبية -->
+<div id="sideMenu">
+  <div id="closeMenu">×</div>
+  <h3>القائمة الجانبية</h3>
+  <ul>
+    <li><a href="#">الرئيسية</a></li>
+    <li><a href="#">المتجر</a></li>
+    <li><a href="#">لوحة المسؤول</a></li>
+    <li><a href="#">الإعدادات</a></li>
+  </ul>
+</div>
+
 <div id="authPanel">
   <h3>تسجيل الدخول</h3>
   <input type="email" id="loginEmail" placeholder="البريد الإلكتروني"><br>
   <input type="password" id="loginPass" placeholder="كلمة المرور"><br>
   <button onclick="login(loginEmail.value, loginPass.value)">تسجيل الدخول</button>
-  <hr>
-  <h3>إنشاء حساب</h3>
-  <input type="email" id="regEmail" placeholder="البريد الإلكتروني"><br>
-  <input type="password" id="regPass" placeholder="كلمة المرور"><br>
-  <button onclick="register(regEmail.value, regPass.value)">إنشاء الحساب</button>
 </div>
 
 <div id="userPanel" style="display:none; margin-top:20px;">
