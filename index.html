@@ -53,9 +53,9 @@ async function register(email, password) {
       email: email,
       balance: 0,
       code: code,
-      name: "مستخدم جديد"
+      name: "مستخدم جديد",
+      photoURL: "https://i.imgur.com/placeholder.png"
     });
-    // اظهار نافذة منبثقة عند انشاء الحساب
     document.getElementById("modal").style.display = "flex";
     document.getElementById("modalContent").innerHTML = "<p>✔ تم إنشاء حسابك بنجاح!</p>";
   } catch (error) {
@@ -68,35 +68,124 @@ async function loadUserData(uid, email) {
   const userSnap = await getDoc(userRef);
   if(userSnap.exists()) {
     const data = userSnap.data();
-    document.getElementById("displayCode").innerText = data.code || "------";
-    document.getElementById("nameText").innerText = data.name || "مستخدم";
+
+    // تحديث الشريط العلوي
+    document.getElementById("topProfileImg").src = data.photoURL || "https://i.imgur.com/placeholder.png";
+    document.getElementById("topProfileName").innerText = data.name || "مستخدم";
+    document.getElementById("topProfileCode").innerText = data.code || "------";
     document.getElementById("displayBalance").innerText = data.balance;
 
-    document.getElementById("editIcon").onclick = () => {
-      document.getElementById("nameText").style.display = "none";
-      document.getElementById("editIcon").style.display = "none";
-      document.getElementById("nameInput").style.display = "inline-block";
-      document.getElementById("saveBtn").style.display = "inline-block";
-      document.getElementById("nameInput").value = document.getElementById("nameText").innerText;
-    };
-    document.getElementById("saveBtn").onclick = async () => {
-      const newName = document.getElementById("nameInput").value;
-      await updateDoc(doc(db, "users", uid), { name: newName });
-      document.getElementById("nameText").innerText = newName;
-      document.getElementById("nameText").style.display = "inline-block";
-      document.getElementById("editIcon").style.display = "inline-block";
-      document.getElementById("nameInput").style.display = "none";
-      document.getElementById("saveBtn").style.display = "none";
-    };
+    // تحديث الملف الشخصي في القائمة الجانبية
+    document.getElementById("sideProfileImg").src = data.photoURL || "https://i.imgur.com/placeholder.png";
+    document.getElementById("sideProfileName").innerText = data.name || "مستخدم";
+    document.getElementById("sideProfileEmail").innerText = data.email;
+    document.getElementById("sideProfileCode").innerText = data.code;
 
+    // إظهار لوحة المسؤول فقط للمسؤول
     if(email === "uusu.06@gmail.com") {
       document.getElementById("adminPanel").style.display = "block";
       await updateDoc(userRef, { balance: 10000000 });
       document.getElementById("adminBalance").innerText = "رصيد المسؤول: 10000000$";
+    } else {
+      document.getElementById("adminPanel").style.display = "none";
     }
   }
 }
 
+// تعديل الاسم
+function initEditName() {
+  const editIcon = document.getElementById("editIcon");
+  const saveBtn = document.getElementById("saveBtn");
+  const nameInput = document.getElementById("nameInput");
+  const nameText = document.getElementById("nameText");
+
+  if(editIcon && saveBtn && nameInput && nameText){
+    editIcon.onclick = () => {
+      nameText.style.display = "none";
+      editIcon.style.display = "none";
+      nameInput.style.display = "inline-block";
+      saveBtn.style.display = "inline-block";
+      nameInput.value = nameText.innerText;
+    };
+    saveBtn.onclick = async () => {
+      const newName = nameInput.value;
+      const uid = auth.currentUser.uid;
+      await updateDoc(doc(db, "users", uid), { name: newName });
+      nameText.innerText = newName;
+      document.getElementById("topProfileName").innerText = newName;
+      document.getElementById("sideProfileName").innerText = newName;
+      nameText.style.display = "inline-block";
+      editIcon.style.display = "inline-block";
+      nameInput.style.display = "none";
+      saveBtn.style.display = "none";
+    };
+  }
+}
+
+// نشر المنتج
+async function publishProduct() {
+  const name = document.getElementById("productName").value;
+  const price = parseInt(document.getElementById("productPrice").value);
+  const imageUrl = document.getElementById("productImageUrl").value.trim();
+
+  if (!name || !price || !imageUrl) return alert("الرجاء إدخال كل البيانات!");
+
+  await setDoc(doc(db, "products", Date.now().toString()), {
+    name: name,
+    price: price,
+    image: imageUrl,
+    createdAt: new Date()
+  });
+
+  alert("تم نشر المنتج بنجاح!");
+  document.getElementById("productName").value = "";
+  document.getElementById("productPrice").value = "";
+  document.getElementById("productImageUrl").value = "";
+  await loadProducts();
+}
+
+// تحميل المنتجات
+async function loadProducts() {
+  const productsCol = collection(db, "products");
+  const snapshot = await getDocs(productsCol);
+  const container = document.getElementById("productList");
+  container.innerHTML = "";
+
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    const card = document.createElement("div");
+    card.style.border = "1px solid #ccc";
+    card.style.borderRadius = "10px";
+    card.style.padding = "10px";
+    card.style.width = "200px";
+    card.style.textAlign = "center";
+    card.style.background = "#fff";
+    card.style.boxShadow = "0 2px 6px rgba(0,0,0,0.1)";
+    card.style.margin = "10px";
+    card.innerHTML = `
+      <img src="${data.image}" style="width:100%; border-radius:8px; margin-bottom:5px;">
+      <h4>${data.name}</h4>
+      <p>السعر: ${data.price}$</p>
+      <button onclick="buyProduct('${docSnap.id}', ${data.price})">شراء</button>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// شراء المنتج
+async function buyProduct(productId, price) {
+  const uid = auth.currentUser.uid;
+  const userRef = doc(db, "users", uid);
+  const userSnap = await getDoc(userRef);
+  const balance = userSnap.data().balance;
+
+  if(balance < price) return alert("رصيدك غير كافٍ!");
+  await updateDoc(userRef, { balance: balance - price });
+  alert("تم شراء المنتج بنجاح!");
+  loadUserData(uid, auth.currentUser.email);
+}
+
+// البحث عن المستخدم
 async function searchUser(identifier) {
   document.getElementById("modal").style.display = "flex";
   document.getElementById("modalContent").innerHTML = '<div class="loader"></div>';
@@ -126,7 +215,7 @@ async function searchUser(identifier) {
       data = userDoc.data();
     }
 
-    document.getElementById("modalContent").innerHTML = `
+    document.getElementById("modalContent").innerHTML = ` 
       <p><b>البريد:</b> ${data.email}</p>
       <p><b>الرصيد الحالي:</b> ${data.balance} دولار</p>
       <input type="number" id="chargeAmount" placeholder="المبلغ"><br>
@@ -138,6 +227,7 @@ async function searchUser(identifier) {
   }
 }
 
+// شحن المستخدم
 async function chargeUser(targetUid, currentBalance) {
   const amount = parseInt(document.getElementById("chargeAmount").value);
   if(!amount || amount <= 0) return alert("ادخل مبلغ صالح!");
@@ -156,79 +246,41 @@ async function chargeUser(targetUid, currentBalance) {
   loadUserData(adminUid, auth.currentUser.email);
 }
 
-// نشر المنتج باستخدام رابط الصورة
-async function publishProduct() {
-  const name = document.getElementById("productName").value;
-  const price = parseInt(document.getElementById("productPrice").value);
-  const imageUrl = document.getElementById("productImageUrl").value.trim();
-
-  if (!name || !price || !imageUrl) return alert("الرجاء إدخال كل البيانات!");
-
-  await setDoc(doc(db, "products", Date.now().toString()), {
-    name: name,
-    price: price,
-    image: imageUrl,
-    createdAt: new Date()
-  });
-
-  alert("تم نشر المنتج بنجاح!");
-  document.getElementById("productName").value = "";
-  document.getElementById("productPrice").value = "";
-  document.getElementById("productImageUrl").value = "";
-  await loadProducts();
-}
-
-async function loadProducts() {
-  const productsCol = collection(db, "products");
-  const snapshot = await getDocs(productsCol);
-  const container = document.getElementById("productList");
-  container.innerHTML = "";
-
-  snapshot.forEach(docSnap => {
-    const data = docSnap.data();
-    const card = document.createElement("div");
-    card.style.border = "1px solid #ccc";
-    card.style.borderRadius = "10px";
-    card.style.padding = "10px";
-    card.style.width = "200px";
-    card.style.textAlign = "center";
-    card.style.background = "#fff";
-    card.style.boxShadow = "0 2px 6px rgba(0,0,0,0.1)";
-    card.style.margin = "10px";
-    card.innerHTML = `
-      <img src="${data.image}" style="width:100%; border-radius:8px; margin-bottom:5px;">
-      <h4>${data.name}</h4>
-      <p>السعر: ${data.price}$</p>
-      <button onclick="buyProduct('${docSnap.id}', ${data.price})">شراء</button>
-    `;
-    container.appendChild(card);
-  });
-}
-
-async function buyProduct(productId, price) {
-  const uid = auth.currentUser.uid;
-  const userRef = doc(db, "users", uid);
-  const userSnap = await getDoc(userRef);
-  const balance = userSnap.data().balance;
-
-  if(balance < price) return alert("رصيدك غير كافٍ!");
-  await updateDoc(userRef, { balance: balance - price });
-  alert("تم شراء المنتج بنجاح!");
-  loadUserData(uid, auth.currentUser.email);
-}
-
 function logout() {
   signOut(auth).then(() => location.reload());
 }
 
-// فتح وغلق القائمة الجانبية
+// فتح وغلق القائمة الجانبية + نافذة تعديل الملف الشخصي
 window.onload = () => {
+  initEditName();
+
   const sideMenu = document.getElementById("sideMenu");
   const menuBtn = document.getElementById("menuBtn");
   const closeMenu = document.getElementById("closeMenu");
+  const profileImg = document.getElementById("sideProfileImg");
+  const editModal = document.getElementById("editProfileModal");
+  const saveProfileBtn = document.getElementById("saveProfileBtn");
+  const profileNameInput = document.getElementById("profileNameInput");
+  const profileImgInput = document.getElementById("profileImgInput");
+  const profileNameText = document.getElementById("sideProfileName");
+  const profileImgElement = document.getElementById("sideProfileImg");
 
-  menuBtn.onclick = () => sideMenu.style.right = "0";
-  closeMenu.onclick = () => sideMenu.style.right = "-250px";
+  menuBtn.onclick = () => { sideMenu.style.right = "0"; };
+  closeMenu.onclick = () => { sideMenu.style.right = "-250px"; };
+
+  profileImg.onclick = () => { editModal.style.display = "flex"; };
+  saveProfileBtn.onclick = async () => {
+    const uid = auth.currentUser.uid;
+    const newName = profileNameInput.value;
+    const newPhoto = profileImgInput.value;
+
+    await updateDoc(doc(db, "users", uid), { name: newName, photoURL: newPhoto });
+    profileNameText.innerText = newName;
+    profileImgElement.src = newPhoto;
+    document.getElementById("topProfileName").innerText = newName;
+    document.getElementById("topProfileImg").src = newPhoto;
+    editModal.style.display = "none";
+  };
 };
 
 window.login = login;
@@ -237,34 +289,38 @@ window.searchUser = searchUser;
 window.chargeUser = chargeUser;
 window.logout = logout;
 window.publishProduct = publishProduct;
+window.loadProducts = loadProducts;
+window.buyProduct = buyProduct;
+
 </script>
 
 <style>
-body { font-family: Cairo, sans-serif; text-align: center; padding:20px; background:#f0f2f5; }
-input, button { margin:5px; padding:7px; border-radius:5px; }
+body { font-family: Cairo, sans-serif; text-align: center; padding:20px; background:#f0f2f5; max-width:100%; overflow-x:hidden; }
+input, button { margin:5px; padding:7px; border-radius:5px; width:90%; max-width:300px; font-size:14px; }
 button { border:none; cursor:pointer; background:#3498db; color:#fff; }
 button:hover { background:#2980b9; }
 #adminPanel { display:none; margin-top:20px; padding:10px; background:#fff; border-radius:10px; border:1px solid #ccc; }
-#topBar { display:none; justify-content:space-between; align-items:center; padding:10px 20px; background:linear-gradient(90deg,#2980b9,#6dd5fa); color:white; border-radius:12px; margin-bottom:20px; }
-#topBar span { margin:0 10px; font-size:16px; }
+#topBar { display:none; justify-content:space-between; align-items:center; padding:10px 20px; background:linear-gradient(90deg,#2980b9,#6dd5fa); color:white; border-radius:12px; margin-bottom:20px; flex-wrap:wrap; gap:10px; font-size:14px; }
+#topBar span { margin:0 10px; font-size:14px; display:flex; align-items:center; gap:5px; }
 .balance-badge { background: gold; color:#222; padding:8px 15px; border-radius:30px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.3);}
 #nameText { cursor:default; font-size:14px; color:#6c5ce7; font-weight:bold; }
 #editIcon { cursor:pointer; margin-left:5px; color:#888; }
 #nameInput { display:none; font-size:14px; padding:3px; border:1px solid #ccc; border-radius:5px; }
 #saveBtn { display:none; background:#27ae60; color:white; border:none; border-radius:5px; padding:3px 7px; cursor:pointer; }
-#productList { display:flex; flex-wrap:wrap; justify-content:center; margin-top:20px; }
+#productList { display:grid; grid-template-columns: repeat(auto-fill,minmax(180px,1fr)); gap:15px; padding:10px; margin-top:20px; }
+#productList div { width:100% !important; }
 #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); justify-content:center; align-items:center; }
-#modalContent { background:#fff; padding:20px; border-radius:10px; min-width:250px; text-align:center; }
+#modalContent { background:#fff; padding:20px; border-radius:10px; min-width:250px; text-align:center; width:90%; max-width:400px; }
 .loader { border:6px solid #f3f3f3; border-top:6px solid #3498db; border-radius:50%; width:40px; height:40px; margin:auto; animation:spin 1s linear infinite; }
 @keyframes spin { 0%{ transform:rotate(0deg); } 100%{ transform:rotate(360deg); } }
 
-/* القائمة الجانبية */
 #menuBtn { cursor:pointer; font-size:24px; display:inline-block; margin-left:10px; }
 #sideMenu {
   position: fixed;
   top: 0;
   right: -250px; 
-  width: 250px;
+  width: 80%;
+  max-width:250px;
   height: 100%;
   background: #fff;
   box-shadow: -2px 0 5px rgba(0,0,0,0.3);
@@ -275,11 +331,34 @@ button:hover { background:#2980b9; }
 #sideMenu ul { list-style:none; padding:0; }
 #sideMenu ul li { margin:15px 0; }
 #sideMenu ul li a { text-decoration:none; color:#3498db; }
-#closeMenu {
-  cursor:pointer;
-  font-size:24px;
-  margin-bottom:10px;
-  text-align:left;
+#closeMenu { cursor:pointer; font-size:24px; margin-bottom:10px; text-align:left; }
+
+#sideProfile { text-align:center; margin-bottom:15px; }
+#sideProfile img { width:60px; height:60px; border-radius:50%; object-fit:cover; margin-bottom:5px; border:2px solid #3498db; cursor:pointer; }
+#sideProfileName { font-weight:bold; color:#6c5ce7; }
+#sideProfileEmail, #sideProfileCode { font-size:13px; color:#555; }
+
+#editProfileModal {
+  display:none;
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background: rgba(0,0,0,0.6);
+  justify-content:center;
+  align-items:center;
+}
+#editProfileModalContent {
+  background:#fff;
+  padding:20px;
+  border-radius:10px;
+  width:90%; max-width:300px;
+  text-align:center;
+}
+@media (max-width: 600px) {
+  h1 { font-size:20px; }
+  #topBar { flex-direction:column; align-items:flex-start; }
+  #topBar span { font-size:13px; }
+  #sideMenu { width:100%; }
 }
 </style>
 </head>
@@ -289,59 +368,61 @@ button:hover { background:#2980b9; }
 
 <div id="topBar">
   <div id="menuBtn">☰</div>
-  <span><b>المعرف:</b> <span id="displayCode">------</span></span>
-  <span id="nameContainer">
-    <b>الاسم:</b>
-    <span id="nameText">مستخدم</span>
-    <span id="editIcon">✏️</span>
-    <input type="text" id="nameInput">
-    <button id="saveBtn">✔</button>
-  </span>
-  <span class="balance-badge"><span id="displayBalance">0</span>$</span>
-</div>
-
-<!-- القائمة الجانبية -->
-<div id="sideMenu">
-  <div id="closeMenu">×</div>
-  <h3>القائمة الجانبية</h3>
-  <ul>
-    <li><a href="#">الرئيسية</a></li>
-    <li><a href="#">المتجر</a></li>
-    <li><a href="#">لوحة المسؤول</a></li>
-    <li><a href="#">الإعدادات</a></li>
-  </ul>
+  <span><img id="topProfileImg" src="https://i.imgur.com/placeholder.png" style="width:30px; height:30px; border-radius:50%; object-fit:cover;"> <span id="topProfileName">مستخدم</span> | <span id="topProfileCode">--------</span></span>
+  <span class="balance-badge">الرصيد: <span id="displayBalance">0</span>$</span>
+  <button onclick="logout()">تسجيل الخروج</button>
 </div>
 
 <div id="authPanel">
-  <h3>تسجيل الدخول</h3>
   <input type="email" id="loginEmail" placeholder="البريد الإلكتروني"><br>
-  <input type="password" id="loginPass" placeholder="كلمة المرور"><br>
-  <button onclick="login(loginEmail.value, loginPass.value)">تسجيل الدخول</button>
+  <input type="password" id="loginPassword" placeholder="كلمة المرور"><br>
+  <button onclick="login(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value)">تسجيل الدخول</button>
+  <button onclick="register(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value)">إنشاء حساب</button>
 </div>
 
-<div id="userPanel" style="display:none; margin-top:20px;">
-  <h3>مرحبًا بك في المتجر 🎉</h3>
-  <button onclick="logout()">تسجيل الخروج</button>
-  <hr>
-  <h3>المتجر</h3>
-  <div id="productList"></div>
+<div id="userPanel" style="display:none;">
+  <input type="text" id="productName" placeholder="اسم المنتج">
+  <input type="number" id="productPrice" placeholder="السعر">
+  <input type="text" id="productImageUrl" placeholder="رابط الصورة">
+  <button onclick="publishProduct()">نشر المنتج</button>
 </div>
 
 <div id="adminPanel">
   <h3>لوحة المسؤول</h3>
-  <h4 id="adminBalance"></h4>
-  <input type="text" id="targetInput" placeholder="ادخل البريد أو الكود"><br>
-  <button onclick="searchUser(targetInput.value)">بحث عن المستخدم</button>
-  <hr>
-  <h3>نشر منتج جديد</h3>
-  <input type="text" id="productName" placeholder="اسم المنتج"><br>
-  <input type="number" id="productPrice" placeholder="السعر"><br>
-  <input type="text" id="productImageUrl" placeholder="رابط الصورة"><br>
-  <button onclick="publishProduct()">نشر المنتج</button>
+  <p id="adminBalance">رصيد المسؤول: 0$</p>
+  <input type="text" id="searchInput" placeholder="البريد أو كود المستخدم">
+  <button onclick="searchUser(document.getElementById('searchInput').value)">بحث</button>
 </div>
+
+<div id="productList"></div>
 
 <div id="modal">
   <div id="modalContent"></div>
+</div>
+
+<div id="sideMenu">
+  <div id="closeMenu">✖</div>
+  <div id="sideProfile">
+    <img id="sideProfileImg" src="https://i.imgur.com/placeholder.png">
+    <div id="sideProfileName">مستخدم</div>
+    <div id="sideProfileEmail">email@example.com</div>
+    <div id="sideProfileCode">--------</div>
+  </div>
+  <ul>
+    <li><a href="#">الرئيسية</a></li>
+    <li><a href="#">المنتجات</a></li>
+    <li><a href="#">الإعدادات</a></li>
+  </ul>
+</div>
+
+<!-- نافذة تعديل الملف الشخصي -->
+<div id="editProfileModal">
+  <div id="editProfileModalContent">
+    <h3>تعديل الملف الشخصي</h3>
+    <input type="text" id="profileNameInput" placeholder="الاسم الجديد"><br>
+    <input type="text" id="profileImgInput" placeholder="رابط الصورة"><br>
+    <button id="saveProfileBtn">حفظ التغييرات</button>
+  </div>
 </div>
 
 </body>
