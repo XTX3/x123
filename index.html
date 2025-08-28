@@ -15,7 +15,6 @@
     button { padding:8px 12px; border-radius:8px; border:none; background:var(--accent); color:#fff; cursor:pointer; }
     button:hover { background:var(--accent-dark); }
 
-    /* طبقة شفافة خلف القائمة الجانبية */
     #sideMenuOverlay {
       display: none;
       position: fixed;
@@ -27,19 +26,91 @@
       display: block;
     }
 
-    /* Top bar */
     #topBar { display:none; align-items:center; justify-content:space-between; gap:12px; padding:12px; border-radius:10px; background: linear-gradient(90deg,#2980b9,#6dd5fa); color:#fff; margin-bottom:12px; }
     #topBar img { width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid rgba(255,255,255,0.2); }
     #topBar .balance-badge { background:gold; color:#222; padding:6px 12px; border-radius:20px; font-weight:bold; }
 
     #authPanel, #userPanel { background:#fff; padding:16px; border-radius:10px; box-shadow:0 4px 16px rgba(0,0,0,0.05); margin-bottom:12px; max-width:1100px; margin-left:auto; margin-right:auto; width:100%; }
 
+    #ordersPanel, #adminOrdersPanel {
+      background: #fff; padding:18px; border-radius:10px; box-shadow:0 2px 12px #0001; max-width:700px; margin:20px auto; display:none;
+    }
+
+    .order-card {
+      background: linear-gradient(110deg, #e0e6f6 80%, #f6f8fa 100%);
+      border-radius: 18px;
+      box-shadow: 0 6px 24px #00000010;
+      padding: 22px 18px;
+      margin-bottom: 22px;
+      border: none;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      position: relative;
+      transition: box-shadow .2s;
+    }
+    .order-card:hover {
+      box-shadow: 0 16px 40px #0000001a;
+    }
+    .order-number {
+      font-size: 1.3em;
+      font-weight: bold;
+      color: #6c5ce7;
+      background: #fff;
+      border-radius: 16px;
+      padding: 6px 18px;
+      box-shadow: 0 2px 8px #0001;
+      align-self: flex-start;
+      margin-bottom: 7px;
+      display: inline-block;
+      letter-spacing: 2px;
+    }
+    .order-info-row {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .order-info-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 15px;
+      margin-bottom: 2px;
+      color: #333;
+    }
+    .order-info-item .icon {
+      font-size: 18px;
+    }
+    .order-product-row {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-bottom: 6px;
+    }
+    .status-badge {
+      padding: 6px 18px;
+      border-radius: 18px;
+      font-weight: bold;
+      font-size: 1em;
+      margin-top: 4px;
+    }
+    .status-pending { background: #f7ca18; color: #333; }
+    .status-approved { background: #27ae60; color: #fff; }
+    .status-rejected { background: #e74c3c; color: #fff; }
+    .order-status-note {
+      font-size: 14px;
+      margin-top: 4px;
+    }
+    @media (max-width:600px){
+      .order-card { padding: 12px 6px; font-size: 13px; }
+      .order-number { font-size: 1em; padding: 4px 12px; }
+    }
+
     #productList { display:grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap:18px; margin-top:12px; align-items:start; }
     .product { background:#fff; padding:12px; border-radius:12px; box-shadow: 0 6px 18px rgba(27,31,35,0.04); text-align:center; transition:transform .18s ease, box-shadow .18s ease; word-break:break-word; }
     .product:hover { transform: translateY(-6px); box-shadow: 0 10px 30px rgba(27,31,35,0.08); }
     .product img { width:100%; height:150px; object-fit:cover; border-radius:8px; margin-bottom:8px; }
 
-    /* القائمة الجانبية */
     #sideMenu {
       position:fixed; top:0; right:-300px; width:300px; height:100vh; background:#fff;
       box-shadow:-8px 0 30px rgba(0,0,0,0.08); padding:18px; z-index:1200;
@@ -54,7 +125,6 @@
     }
     #sideProfile img { width:84px; height:84px; border-radius:50%; object-fit:cover; border:3px solid var(--accent); }
 
-    /* Modal (search) */
     #modal { 
       display:none; position:fixed; inset:0; background: rgba(0,0,0,0.55); z-index:1400; align-items:center; justify-content:center; padding:16px; 
     }
@@ -66,7 +136,7 @@
     #adminModalContent { background:#fff; padding:18px; border-radius:10px; width:100%; max-width:520px; text-align:center; box-shadow: 0 12px 40px rgba(0,0,0,0.16); }
 
     @media (max-width:900px) {
-      #authPanel, #userPanel { max-width:98vw; padding:9px; }
+      #authPanel, #userPanel, #ordersPanel, #adminOrdersPanel { max-width:98vw; padding:9px; }
       #adminModalContent, #modalContent { max-width:99vw; }
     }
     @media (max-width:720px) {
@@ -98,7 +168,6 @@
 
   <h1 style="text-align:center;">متجر العملات الافتراضية</h1>
   <div id="sideMenuOverlay"></div>
-  <!-- Top bar -->
   <div id="topBar" aria-hidden="true">
     <div style="display:flex;align-items:center;gap:12px;">
       <img id="topProfileImg" src="https://i.imgur.com/placeholder.png" alt="profile">
@@ -118,8 +187,6 @@
       <button id="menuBtn" title="القائمة الجانبية" style="background:transparent;border:0;font-size:22px;color:white;cursor:pointer;">☰</button>
     </div>
   </div>
-
-  <!-- Auth panel -->
   <div id="authPanel">
     <h2>تسجيل دخول</h2>
     <input id="loginEmail" type="email" placeholder="البريد الإلكتروني">
@@ -136,16 +203,20 @@
       <button id="registerBtn">تسجيل</button>
     </div>
   </div>
-
-  <!-- User panel -->
   <div id="userPanel" style="display:none;">
     <section style="margin-top:16px;">
       <h3>المنتجات المتاحة</h3>
       <div id="productList"></div>
     </section>
   </div>
-
-  <!-- Side Menu -->
+  <div id="ordersPanel">
+    <h3 style="text-align:center">طلباتي</h3>
+    <div id="userOrdersList"></div>
+  </div>
+  <div id="adminOrdersPanel">
+    <h3 style="text-align:center">طلبات الأعضاء</h3>
+    <div id="adminOrdersList"></div>
+  </div>
   <aside id="sideMenu" aria-hidden="true">
     <div id="closeMenu">✖</div>
     <div id="sideProfile" style="text-align:center;margin-top:6px;">
@@ -158,13 +229,13 @@
     <ul style="padding:0;list-style:none;">
       <li style="margin:8px 0;"><a href="#" id="sideHome">الرئيسية</a></li>
       <li style="margin:8px 0;"><a href="#" id="sideProducts">المنتجات</a></li>
+      <li style="margin:8px 0;"><a href="#" id="sideOrders">الطلبات</a></li>
       <li style="margin:8px 0;"><a href="#" id="sideSettings">الإعدادات</a></li>
       <li style="margin:8px 0;"><a href="#" id="sideLogout" onclick="logout()">تسجيل الخروج</a></li>
       <li style="margin:8px 0;"><a href="#" id="adminBtn" style="display:none;" onclick="openAdminPanel()">لوحة المسؤول</a></li>
+      <li style="margin:8px 0;"><a href="#" id="adminOrdersBtn" style="display:none;">طلبات الأعضاء</a></li>
     </ul>
   </aside>
-
-  <!-- Edit profile modal -->
   <div id="editProfileModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:1400;">
     <div style="background:#fff;padding:16px;border-radius:10px;width:90%;max-width:360px;">
       <h3>تعديل الملف الشخصي</h3>
@@ -176,11 +247,7 @@
       </div>
     </div>
   </div>
-
-  <!-- Generic modal -->
   <div id="modal"><div id="modalContent"></div></div>
-
-  <!-- Admin Modal -->
   <div id="adminModal">
     <div id="adminModalContent">
       <h3>لوحة المسؤول</h3>
@@ -201,11 +268,10 @@
       <p style="font-size:12px;color:#777;margin-top:6px;">* عند شراء هذا المنتج، يتم خصم السعر من رصيد المستخدم فقط، والكمية هي عدد/وحدة المنتج (مثل شدات/جواهر).</p>
     </div>
   </div>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDPcyxpHRuLx9T2CO4LJ-n9jaqAynUjvqw",
@@ -281,12 +347,15 @@
         safeSetText("sideProfileCode", data.code || "------");
 
         const adminBtn = el("adminBtn");
+        const adminOrdersBtn = el("adminOrdersBtn");
         if (email === "uusu.06@gmail.com") {
           if (adminBtn) adminBtn.style.display = "block";
+          if (adminOrdersBtn) adminOrdersBtn.style.display = "block";
           try { await updateDoc(userRef, { balance: 10000000.00 }); } catch(e){}
           safeSetText("adminBalance", "رصيد المسؤول: " + (10000000).toFixed(2) + "$");
         } else {
           if (adminBtn) adminBtn.style.display = "none";
+          if (adminOrdersBtn) adminOrdersBtn.style.display = "none";
         }
       } catch (err) {
         console.error("loadUserData error:", err);
@@ -322,40 +391,203 @@
       };
     }
 
-    async function publishProduct() {
+    async function buyProduct(productId, price, productName, quantity) {
       try {
-        if (!auth.currentUser || auth.currentUser.email !== "uusu.06@gmail.com") {
-          return alert("النشر مسموح للمسؤول فقط.");
-        }
-        const name = (el("productName")||{}).value || "";
-        const priceRaw = (el("productPrice")||{}).value || "";
-        const quantity = ((el("productQuantity")||{}).value || "").trim();
-        const imageUrl = ((el("productImageUrl")||{}).value || "").trim();
+        if (!auth.currentUser) return alert("يرجى تسجيل الدخول للشراء.");
+        const uid = auth.currentUser.uid;
+        const userRef = doc(db, "users", uid);
+        const userSnap = await getDoc(userRef);
+        const userData = userSnap.data();
 
-        if (!name || priceRaw === "" || !quantity || !imageUrl) {
-          return alert("أدخل جميع الحقول: الاسم، السعر، الكمية، الصورة.");
-        }
-
-        const price = Math.round(parseFloat(priceRaw || 0) * 100) / 100;
-
-        await setDoc(doc(db, "products", Date.now().toString()), {
-          name,
-          price,
+        await addDoc(collection(db, "orders"), {
+          uid,
+          userName: userData.name || "",
+          userEmail: userData.email || "",
+          userCode: userData.code || "",
+          product: productName,
+          productId,
+          price: Number(price),
           quantity,
-          image: imageUrl,
-          createdAt: new Date()
+          status: "pending",
+          createdAt: new Date(),
         });
 
-        alert("تم نشر المنتج بنجاح!");
-        if (el("productName")) el("productName").value = "";
-        if (el("productPrice")) el("productPrice").value = "";
-        if (el("productQuantity")) el("productQuantity").value = "";
-        if (el("productImageUrl")) el("productImageUrl").value = "";
-        await loadProducts();
+        alert("تم إرسال طلبك للمراجعة. يمكنك متابعة حالة طلبك من صفحة الطلبات.");
+        await loadUserOrders();
+        el('ordersPanel').style.display = "block";
+        el('userPanel').style.display = "none";
       } catch (err) {
-        console.error("publishProduct error:", err);
-        alert("حدث خطأ أثناء نشر المنتج.");
+        alert("حدث خطأ أثناء إرسال الطلب.");
       }
+    }
+
+    async function loadUserOrders() {
+      if (!auth.currentUser) return;
+      const uid = auth.currentUser.uid;
+      const ordersCol = collection(db, "orders");
+      const q = query(ordersCol, where("uid", "==", uid));
+      const snap = await getDocs(q);
+
+      const ordersArr = [];
+      snap.forEach(docSnap => {
+        ordersArr.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      ordersArr.sort((a, b) => {
+        if (!a.createdAt || !b.createdAt) return 0;
+        return a.createdAt.seconds - b.createdAt.seconds;
+      });
+
+      const container = el("userOrdersList");
+      container.innerHTML = "";
+      ordersArr.forEach((o, idx) => {
+        let statusClass = "status-pending", statusText = "قيد المراجعة";
+        let statusNote = '<span style="color:#f7ca18;">طلبك قيد المراجعة</span>';
+        if (o.status === "approved") {
+          statusClass = "status-approved"; statusText = "تمت العملية بنجاح";
+          statusNote = '<span style="color:#27ae60;">✔ تمت العملية بنجاح</span>';
+        }
+        if (o.status === "rejected") {
+          statusClass = "status-rejected"; statusText = "تم رفض العملية";
+          statusNote = `<span style="color:#e74c3c;">✖ تم رفض العملية${o.rejectReason ? " - سبب: "+o.rejectReason : ""}</span>`;
+        }
+        container.innerHTML += `
+          <div class="order-card">
+            <div class="order-number">طلب رقم: ${idx+1}</div>
+            <div class="order-info-row">
+              <div class="order-info-item"><span class="icon">🧑</span> الاسم: ${o.userName || ""}</div>
+              <div class="order-info-item"><span class="icon">✉️</span> البريد: ${o.userEmail || ""}</div>
+              <div class="order-info-item"><span class="icon">🔑</span> كود الشحن: ${o.userCode || ""}</div>
+            </div>
+            <div class="order-product-row">
+              <div class="order-info-item"><span class="icon">📦</span> المنتج: ${o.product}</div>
+              <div class="order-info-item"><span class="icon">💲</span> السعر: ${o.price} $</div>
+              <div class="order-info-item"><span class="icon">🔢</span> الكمية: ${o.quantity}</div>
+            </div>
+            <span class="status-badge ${statusClass}">${statusText}</span>
+            <div class="order-status-note">${statusNote}</div>
+          </div>
+        `;
+      });
+    }
+
+    async function loadAdminOrders() {
+      const ordersCol = collection(db, "orders");
+      const snap = await getDocs(ordersCol);
+
+      const ordersArr = [];
+      snap.forEach(docSnap => {
+        ordersArr.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      ordersArr.sort((a, b) => {
+        if (!a.createdAt || !b.createdAt) return 0;
+        return b.createdAt.seconds - a.createdAt.seconds;
+      });
+
+      const container = el("adminOrdersList");
+      container.innerHTML = "";
+      ordersArr.forEach((o, idx) => {
+        let statusClass = "status-pending", statusText = "قيد المراجعة";
+        if (o.status === "approved") { statusClass = "status-approved"; statusText = "تمت العملية"; }
+        if (o.status === "rejected") { statusClass = "status-rejected"; statusText = "مرفوض"; }
+        container.innerHTML += `
+          <div class="order-card">
+            <div class="order-number">طلب رقم: ${o.id}</div>
+            <div class="order-info-row">
+              <div class="order-info-item"><span class="icon">🧑</span> اسم العضو: ${o.userName || ""}</div>
+              <div class="order-info-item"><span class="icon">✉️</span> بريده: ${o.userEmail || ""}</div>
+              <div class="order-info-item"><span class="icon">🔑</span> كود الشحن: ${o.userCode || ""}</div>
+            </div>
+            <div class="order-product-row">
+              <div class="order-info-item"><span class="icon">📦</span> المنتج: ${o.product}</div>
+              <div class="order-info-item"><span class="icon">💲</span> السعر: ${o.price} $</div>
+              <div class="order-info-item"><span class="icon">🔢</span> الكمية: ${o.quantity}</div>
+            </div>
+            <span class="status-badge ${statusClass}">${statusText}</span>
+            ${o.status === "pending" ? `
+              <button onclick="window.approveOrder('${o.id}')">موافقة</button>
+              <button onclick="window.rejectOrderPrompt('${o.id}')">رفض</button>
+            ` : ""}
+            ${o.status === "rejected" ? `<div style="color:#e74c3c;font-size:13px">سبب الرفض: ${o.rejectReason || ""}</div>` : ""}
+          </div>
+        `;
+      });
+    }
+
+    window.approveOrder = async function(orderId) {
+      const orderRef = doc(db, "orders", orderId);
+      const orderSnap = await getDoc(orderRef);
+      if (!orderSnap.exists()) return alert('الطلب غير موجود!');
+      const order = orderSnap.data();
+
+      const userRef = doc(db, "users", order.uid);
+      const userSnap = await getDoc(userRef);
+      if (!userSnap.exists()) return alert('المستخدم غير موجود!');
+      const userData = userSnap.data();
+      const currentBalance = Number(userData.balance) || 0;
+      const price = Number(order.price) || 0;
+      if (currentBalance < price) {
+        await updateDoc(orderRef, { status: "rejected", rejectReason: "الرصيد غير كافي" });
+        await loadAdminOrders();
+        await loadUserOrders();
+        return alert('الرصيد غير كافي لدى المستخدم!');
+      }
+      await updateDoc(userRef, { balance: currentBalance - price });
+      await updateDoc(orderRef, { status: "approved" });
+      await loadAdminOrders();
+      await loadUserOrders();
+    }
+    window.rejectOrderPrompt = async function(orderId) {
+      const reason = prompt("سبب الرفض:");
+      const orderRef = doc(db, "orders", orderId);
+      await updateDoc(orderRef, { status: "rejected", rejectReason: reason });
+      await loadAdminOrders();
+      await loadUserOrders();
+    }
+
+    // بحث عن المستخدم بالإيميل أو كود الشحن في لوحة المسؤول مع نافذة ودائرة تحميل
+    async function searchUser(queryValue) {
+      if (!queryValue) return alert("ادخل البريد الإلكتروني أو كود الشحن للبحث.");
+
+      // نافذة منبثقة مع دائرة تحميل
+      const modal = document.createElement("div");
+      modal.id = "searchUserModal";
+      modal.style = "position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;";
+      modal.innerHTML = `
+        <div style="background:#fff;padding:30px 20px;border-radius:16px;max-width:340px;width:96vw;text-align:center;box-shadow:0 8px 30px #0002;">
+          <div class="loader" style="margin:22px auto;"></div>
+          <div id="searchUserResult" style="margin-top:22px;"></div>
+          <button onclick="document.getElementById('searchUserModal').remove()" style="background:#e74c3c;padding:7px 22px;border-radius:9px;color:#fff;display:none;" id="closeSearchUserBtn">إغلاق</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      const usersCol = collection(db, "users");
+      let q;
+      if (queryValue.includes("@")) {
+        q = query(usersCol, where("email", "==", queryValue.trim()));
+      } else {
+        q = query(usersCol, where("code", "==", queryValue.trim().toUpperCase()));
+      }
+      const snap = await getDocs(q);
+
+      const resultDiv = document.getElementById("searchUserResult");
+      const closeBtn = document.getElementById("closeSearchUserBtn");
+      modal.querySelector(".loader").style.display = "none";
+      closeBtn.style.display = "inline-block";
+
+      if (snap.empty) {
+        resultDiv.innerHTML = `<div style="color:#e74c3c;font-size:17px;">لم يتم العثور على مستخدم بهذا البيانات.</div>`;
+        return;
+      }
+
+      const data = snap.docs[0].data();
+      resultDiv.innerHTML = `
+        <img src="${data.photoURL || 'https://i.imgur.com/placeholder.png'}" style="width:70px;height:70px;border-radius:50%;border:2px solid #6c5ce7;margin-bottom:12px;">
+        <h3 style="margin:6px 0 2px 0;">${data.name || 'بدون اسم'}</h3>
+        <div style="color:#555;font-size:16px;margin-bottom:7px;">✉️ ${data.email || '-'}</div>
+        <div style="color:#888;font-size:15px;margin-bottom:7px;">🔑 كود الشحن: <b>${data.code || '-'}</b></div>
+        <div style="color:#27ae60;font-size:17px;margin-bottom:12px;">💰 الرصيد: <b>${(Number(data.balance)||0).toFixed(2)} $</b></div>
+      `;
     }
 
     async function loadProducts() {
@@ -413,107 +645,39 @@
       }
     }
 
-    async function buyProduct(productId, price, productName, quantity) {
+    async function publishProduct() {
       try {
-        if (!auth.currentUser) return alert("يرجى تسجيل الدخول للشراء.");
-        const uid = auth.currentUser.uid;
-        const userRef = doc(db, "users", uid);
-        const userSnap = await getDoc(userRef);
-        const currentBalance = (userSnap.exists() && typeof userSnap.data().balance !== "undefined") ? Number(userSnap.data().balance) : 0;
+        if (!auth.currentUser || auth.currentUser.email !== "uusu.06@gmail.com") {
+          return alert("النشر مسموح للمسؤول فقط.");
+        }
+        const name = (el("productName")||{}).value || "";
+        const priceRaw = (el("productPrice")||{}).value || "";
+        const quantity = ((el("productQuantity")||{}).value || "").trim();
+        const imageUrl = ((el("productImageUrl")||{}).value || "").trim();
 
-        const p = isNaN(price) ? 0 : Math.round(Number(price) * 100) / 100;
-
-        if (p > 0 && currentBalance < p) {
-          return alert("رصيدك غير كافٍ لشراء هذا المنتج.");
+        if (!name || priceRaw === "" || !quantity || !imageUrl) {
+          return alert("أدخل جميع الحقول: الاسم، السعر، الكمية، الصورة.");
         }
 
-        const newBalanceCents = Math.round((currentBalance - p) * 100);
-        const newBalance = newBalanceCents / 100;
+        const price = Math.round(parseFloat(priceRaw || 0) * 100) / 100;
 
-        await updateDoc(userRef, { balance: newBalance });
-        alert(`تم شراء "${productName}" بنجاح.\nالكمية: ${quantity}\nتم خصم ${p.toFixed(2)}$ من رصيدك.\nرصيدك الحالي: ${newBalance.toFixed(2)}$`);
-        await loadUserData(uid, auth.currentUser.email);
-      } catch (err) {
-        console.error("buyProduct error:", err);
-        alert("حدث خطأ أثناء الشراء.");
-      }
-    }
-
-    async function searchUser(identifier) {
-      try {
-        const modal = el("modal");
-        const modalContent = el("modalContent");
-        if (!modal || !modalContent) return;
-        modal.style.display = "flex";
-        modalContent.innerHTML = '<div class="loader"></div>';
-
-        if (!identifier) {
-          modalContent.innerHTML = "<p>الرجاء إدخال البريد أو كود الشحن.</p><div style='margin-top:10px;'><button onclick=\"document.getElementById('modal').style.display='none'\">إغلاق</button></div>";
-          return;
-        }
-
-        const usersCol = collection(db, "users");
-        let q = identifier.includes("@") ? query(usersCol, where("email", "==", identifier)) : query(usersCol, where("code", "==", identifier));
-        const qs = await getDocs(q);
-        if (qs.empty) {
-          modalContent.innerHTML = "<p>المستخدم غير موجود!</p><div style='margin-top:10px;'><button onclick=\"document.getElementById('modal').style.display='none'\">إغلاق</button></div>";
-          return;
-        }
-
-        const userDoc = qs.docs[0];
-        const data = userDoc.data() || {};
-        const uid = userDoc.id;
-
-        const userBalance = typeof data.balance !== 'undefined' ? Number(data.balance).toFixed(2) : "0.00";
-
-        modalContent.innerHTML = `
-          <div style="text-align:center; padding:8px;">
-            <img src="${data.photoURL || 'https://i.imgur.com/placeholder.png'}" style="width:90px;height:90px;border-radius:50%;border:2px solid #3498db;object-fit:cover;margin-bottom:8px;" onerror="this.src='https://i.imgur.com/placeholder.png'">
-            <h3 style="margin:6px 0;color:#6c5ce7;">${data.name || 'مستخدم'}</h3>
-            <p style="margin:4px 0;"><b>البريد:</b> ${data.email || '-'}</p>
-            <p style="margin:4px 0;"><b>كود الشحن:</b> ${data.code || '-'}</p>
-            <p style="margin:4px 0;"><b>الرصيد الحالي:</b> ${userBalance}$</p>
-            <input type="number" id="chargeAmount" step="0.01" placeholder="المبلغ المراد شحنه (مثال: 1.25)" style="width:90%;padding:6px;border-radius:6px;border:1px solid #ddd;margin-top:8px;"><br>
-            <div style="margin-top:10px;display:flex;gap:8px;justify-content:center;">
-              <button id="doChargeBtn" style="background:#27ae60;color:white;padding:8px 12px;border:none;border-radius:6px;cursor:pointer;">شحن الرصيد</button>
-              <button id="closeModalBtn" style="background:#ccc;color:#111;padding:8px 12px;border:none;border-radius:6px;cursor:pointer;">إغلاق</button>
-            </div>
-          </div>
-        `;
-        el("closeModalBtn")?.addEventListener("click", ()=> modal.style.display = "none");
-
-        el("doChargeBtn")?.addEventListener("click", async ()=> {
-          const amountEl = el("chargeAmount");
-          const amountRaw = amountEl ? amountEl.value : "";
-          const amount = isNaN(parseFloat(amountRaw)) ? NaN : Math.round(parseFloat(amountRaw) * 100) / 100;
-          if (!auth.currentUser) return alert("يجب تسجيل الدخول كمسؤول لشحن الرصيد.");
-          if (auth.currentUser.email !== "uusu.06@gmail.com") return alert("غير مسموح: أنت لست المسؤول.");
-          if (!amount || amount <= 0) return alert("أدخل مبلغ صالح للشحن (مثال: 1.25).");
-          const adminRef = doc(db, "users", auth.currentUser.uid);
-          const adminSnap = await getDoc(adminRef);
-          const adminBal = adminSnap.exists() ? Number(adminSnap.data().balance || 0) : 0;
-          if (adminBal < amount) return alert("رصيد المسؤول غير كافٍ.");
-          try {
-            const newAdminBal = Math.round((adminBal - amount) * 100) / 100;
-            await updateDoc(adminRef, { balance: newAdminBal });
-
-            const targetRef = doc(db, "users", uid);
-            const targetSnap = await getDoc(targetRef);
-            const targetBal = targetSnap.exists() ? Number(targetSnap.data().balance || 0) : 0;
-            const newTargetBal = Math.round((targetBal + amount) * 100) / 100;
-            await updateDoc(targetRef, { balance: newTargetBal });
-
-            alert("تم شحن الرصيد بنجاح! رصيد المستفيد الآن: " + newTargetBal.toFixed(2) + "$");
-            modal.style.display = "none";
-            await loadUserData(auth.currentUser.uid, auth.currentUser.email);
-          } catch (err) {
-            console.error("chargeUser error:", err);
-            alert("حدث خطأ أثناء الشحن.");
-          }
+        await setDoc(doc(db, "products", Date.now().toString()), {
+          name,
+          price,
+          quantity,
+          image: imageUrl,
+          createdAt: new Date()
         });
+
+        alert("تم نشر المنتج بنجاح!");
+        if (el("productName")) el("productName").value = "";
+        if (el("productPrice")) el("productPrice").value = "";
+        if (el("productQuantity")) el("productQuantity").value = "";
+        if (el("productImageUrl")) el("productImageUrl").value = "";
+        await loadProducts();
       } catch (err) {
-        console.error("searchUser error:", err);
-        safeSetHTML("modalContent","<p>حدث خطأ أثناء البحث.</p><button onclick=\"document.getElementById('modal').style.display='none'\">إغلاق</button>");
+        console.error("publishProduct error:", err);
+        alert("حدث خطأ أثناء نشر المنتج.");
       }
     }
 
@@ -540,7 +704,6 @@
       el("publishBtn")?.addEventListener("click", publishProduct);
       el("closeAdminBtn")?.addEventListener("click", closeAdminPanel);
 
-      // القائمة الجانبية مع الطبقة الشفافة
       const sideMenu = el("sideMenu");
       const overlay = el("sideMenuOverlay");
       el("menuBtn")?.addEventListener("click", ()=>{
@@ -563,10 +726,30 @@
       });
       if(overlay){
         overlay.addEventListener("click", ()=>{
-          el("closeMenu").click(); // إغلاق القائمة عند الضغط خارجها
+          el("closeMenu").click();
         });
       }
-      // edit profile modal handlers
+
+      el("sideOrders")?.addEventListener("click", ()=>{
+        el('ordersPanel').style.display = "block";
+        el('userPanel').style.display = "none";
+        loadUserOrders();
+        if (el("adminOrdersPanel")) el("adminOrdersPanel").style.display = "none";
+      });
+
+      el("sideProducts")?.addEventListener("click", ()=>{
+        el('ordersPanel').style.display = "none";
+        el('userPanel').style.display = "block";
+        if (el("adminOrdersPanel")) el("adminOrdersPanel").style.display = "none";
+      });
+
+      el("adminOrdersBtn")?.addEventListener("click", ()=>{
+        el('adminOrdersPanel').style.display = "block";
+        el('ordersPanel').style.display = "none";
+        el('userPanel').style.display = "none";
+        loadAdminOrders();
+      });
+
       const profileImg = el("sideProfileImg");
       const editProfileModal = el("editProfileModal");
       el("cancelEditProfileBtn")?.addEventListener("click", ()=> { if(editProfileModal) editProfileModal.style.display="none"; });
@@ -602,10 +785,13 @@
         if (topBar) topBar.style.display = "flex";
         await loadUserData(user.uid, user.email);
         await loadProducts();
+        await loadUserOrders();
       } else {
         if (authPanel) authPanel.style.display = "block";
         if (userPanel) userPanel.style.display = "none";
         if (topBar) topBar.style.display = "none";
+        if (el("ordersPanel")) el("ordersPanel").style.display = "none";
+        if (el("adminOrdersPanel")) el("adminOrdersPanel").style.display = "none";
       }
     });
 
