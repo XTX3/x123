@@ -391,6 +391,7 @@
       };
     }
 
+    // هنا التعديل الأساسي: خصم الرصيد عند الطلب وإرجاعه عند الرفض
     async function buyProduct(productId, price, productName, quantity) {
       try {
         if (!auth.currentUser) return alert("يرجى تسجيل الدخول للشراء.");
@@ -398,7 +399,18 @@
         const userRef = doc(db, "users", uid);
         const userSnap = await getDoc(userRef);
         const userData = userSnap.data();
+        const currentBalance = Number(userData.balance) || 0;
+        const priceVal = Number(price);
 
+        // التحقق من الرصيد
+        if (currentBalance < priceVal) {
+          return alert("رصيدك غير كافي لإتمام الطلب.");
+        }
+
+        // خصم الرصيد مباشرة
+        await updateDoc(userRef, { balance: currentBalance - priceVal });
+
+        // إنشاء الطلب وتخزين قيمة الخصم فيه
         await addDoc(collection(db, "orders"), {
           uid,
           userName: userData.name || "",
@@ -406,16 +418,18 @@
           userCode: userData.code || "",
           product: productName,
           productId,
-          price: Number(price),
+          price: priceVal,
           quantity,
           status: "pending",
           createdAt: new Date(),
+          deducted: priceVal // نضيف قيمة الرصيد المخصوم للطلب
         });
 
         alert("تم إرسال طلبك للمراجعة. يمكنك متابعة حالة طلبك من صفحة الطلبات.");
         await loadUserOrders();
         el('ordersPanel').style.display = "block";
         el('userPanel').style.display = "none";
+        await loadUserData(uid, userData.email); // تحديث الرصيد المعروض
       } catch (err) {
         alert("حدث خطأ أثناء إرسال الطلب.");
       }
@@ -519,26 +533,31 @@
       if (!orderSnap.exists()) return alert('الطلب غير موجود!');
       const order = orderSnap.data();
 
-      const userRef = doc(db, "users", order.uid);
-      const userSnap = await getDoc(userRef);
-      if (!userSnap.exists()) return alert('المستخدم غير موجود!');
-      const userData = userSnap.data();
-      const currentBalance = Number(userData.balance) || 0;
-      const price = Number(order.price) || 0;
-      if (currentBalance < price) {
-        await updateDoc(orderRef, { status: "rejected", rejectReason: "الرصيد غير كافي" });
-        await loadAdminOrders();
-        await loadUserOrders();
-        return alert('الرصيد غير كافي لدى المستخدم!');
-      }
-      await updateDoc(userRef, { balance: currentBalance - price });
+      // لا حاجة لخصم الرصيد هنا لأنه تم الخصم عند الإنشاء
       await updateDoc(orderRef, { status: "approved" });
       await loadAdminOrders();
       await loadUserOrders();
     }
+
+    // هنا التعديل الأساسي الثاني: إعادة الرصيد عند الرفض
     window.rejectOrderPrompt = async function(orderId) {
       const reason = prompt("سبب الرفض:");
       const orderRef = doc(db, "orders", orderId);
+      const orderSnap = await getDoc(orderRef);
+      if (!orderSnap.exists()) return;
+      const order = orderSnap.data();
+
+      // إعادة الرصيد فقط إذا كان الطلب مخصوم منه الرصيد (deducted موجود)
+      if (order.deducted && order.uid) {
+        const userRef = doc(db, "users", order.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          const updatedBalance = (Number(userData.balance) || 0) + Number(order.deducted);
+          await updateDoc(userRef, { balance: updatedBalance });
+        }
+      }
+
       await updateDoc(orderRef, { status: "rejected", rejectReason: reason });
       await loadAdminOrders();
       await loadUserOrders();
@@ -556,6 +575,7 @@
         <div style="background:#fff;padding:30px 20px;border-radius:16px;max-width:340px;width:96vw;text-align:center;box-shadow:0 8px 30px #0002;">
           <div class="loader" style="margin:22px auto;"></div>
           <div id="searchUserResult" style="margin-top:22px;"></div>
+          <div id="adminTransferSection" style="margin-top:18px;display:none;"></div>
           <button onclick="document.getElementById('searchUserModal').remove()" style="background:#e74c3c;padding:7px 22px;border-radius:9px;color:#fff;display:none;" id="closeSearchUserBtn">إغلاق</button>
         </div>
       `;
@@ -572,6 +592,7 @@
 
       const resultDiv = document.getElementById("searchUserResult");
       const closeBtn = document.getElementById("closeSearchUserBtn");
+      const transferSection = document.getElementById("adminTransferSection");
       modal.querySelector(".loader").style.display = "none";
       closeBtn.style.display = "inline-block";
 
@@ -580,14 +601,53 @@
         return;
       }
 
-      const data = snap.docs[0].data();
+      const docSnap = snap.docs[0];
+      const data = docSnap.data();
       resultDiv.innerHTML = `
         <img src="${data.photoURL || 'https://i.imgur.com/placeholder.png'}" style="width:70px;height:70px;border-radius:50%;border:2px solid #6c5ce7;margin-bottom:12px;">
         <h3 style="margin:6px 0 2px 0;">${data.name || 'بدون اسم'}</h3>
         <div style="color:#555;font-size:16px;margin-bottom:7px;">✉️ ${data.email || '-'}</div>
         <div style="color:#888;font-size:15px;margin-bottom:7px;">🔑 كود الشحن: <b>${data.code || '-'}</b></div>
-        <div style="color:#27ae60;font-size:17px;margin-bottom:12px;">💰 الرصيد: <b>${(Number(data.balance)||0).toFixed(2)} $</b></div>
+        <div style="color:#27ae60;font-size:17px;margin-bottom:12px;">💰 الرصيد: <b id="searchedUserBalance">${(Number(data.balance)||0).toFixed(2)} $</b></div>
       `;
+
+      // -------- إضافة قسم تحويل الرصيد --------
+      transferSection.style.display = "block";
+      transferSection.innerHTML = `
+        <hr>
+        <div style="margin-bottom:8px;font-weight:bold;">تحويل رصيد لهذا العضو</div>
+        <input id="transferAmountInput" type="number" step="0.01" min="0" placeholder="كمية الرصيد (مثال: 10.00)" style="padding:7px;width:70%;margin-bottom:6px;border-radius:7px;border:1px solid #ddd;">
+        <button id="transferBtn" style="background:#27ae60;color:#fff;padding:7px 16px;border-radius:8px;font-size:15px;cursor:pointer;">تحويل</button>
+        <div id="transferMsg" style="margin-top:7px;font-size:14px;color:#e74c3c;"></div>
+      `;
+
+      // -------- وظيفة تحويل الرصيد --------
+      document.getElementById("transferBtn").onclick = async function() {
+        const amountInput = document.getElementById("transferAmountInput");
+        const msgDiv = document.getElementById("transferMsg");
+        let amount = parseFloat(amountInput.value);
+        if (isNaN(amount) || amount <= 0) {
+          msgDiv.style.color = "#e74c3c";
+          msgDiv.textContent = "يرجى إدخال كمية رصيد صحيحة أكبر من صفر.";
+          return;
+        }
+        msgDiv.style.color = "#333";
+        msgDiv.textContent = "جاري التحويل ...";
+        try {
+          // تحديث الرصيد في قاعدة البيانات
+          const userRef = doc(db, "users", docSnap.id);
+          const oldBalance = Number(data.balance) || 0;
+          await updateDoc(userRef, { balance: oldBalance + amount });
+          msgDiv.style.color = "#27ae60";
+          msgDiv.textContent = `✔ تم تحويل ${amount.toFixed(2)} $ بنجاح!`;
+          // تحديث عرض الرصيد مباشرة
+          document.getElementById("searchedUserBalance").textContent = (oldBalance + amount).toFixed(2) + " $";
+          data.balance = oldBalance + amount; // تعديل القيمة المحلية
+        } catch (err) {
+          msgDiv.style.color = "#e74c3c";
+          msgDiv.textContent = "حدث خطأ أثناء التحويل.";
+        }
+      };
     }
 
     async function loadProducts() {
