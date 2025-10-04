@@ -212,6 +212,96 @@
       #adminModalContent, #modalContent { padding:5px; }
       #sideMenu { width:80vw; min-width:140px; max-width:96vw; right:-80vw; }
     }
+    
+    
+    
+    #sideMenu {
+  position: fixed;
+  top: 0;
+  right: -300px;
+  width: 290px;
+  height: 100vh;
+  background: linear-gradient(120deg, #6c5ce7 60%, #00cfd5 100%);
+  box-shadow: -12px 0 32px #0002;
+  padding: 24px 18px 18px 18px;
+  z-index: 1200;
+  display: none;
+  border-radius: 22px 0 0 22px;
+  transition: right .32s cubic-bezier(.77,0,.18,1);
+  overflow-y: auto;
+}
+
+#sideMenu.active {
+  right: 0;
+  display: block;
+}
+
+#closeMenu {
+  cursor: pointer;
+  font-size: 26px;
+  color: #fff;
+  text-align: left;
+  margin-bottom: 12px;
+  padding: 7px 0;
+  transition: color .2s;
+   background: transparent;
+}
+
+#closeMenu:hover { color: #f7ca18; }
+
+#sideProfile img {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #transparent;
+  box-shadow: 0 2px 18px #transparent;
+  margin-bottom: 9px;
+   background: transparent;
+}
+#sideProfile h4, #sideProfile p {
+  color: #fff;
+  margin: 5px 0 0 0;
+}
+
+#sideMenu ul {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0 0;
+}
+#sideMenu ul li {
+  margin: 13px 0;
+}
+#sideMenu ul li a {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: #fff;
+  background: rgba(0,0,0,0.10);
+  border: none;
+  font-size: 16.5px;
+  padding: 11px 18px;
+  border-radius: 13px;
+  text-decoration: none;
+  box-shadow: 0 2px 10px #0001;
+  transition: background .18s, color .18s, box-shadow .2s;
+  font-weight: bold;
+  letter-spacing: .2px;
+}
+#sideMenu ul li a:hover, 
+#sideMenu ul li a:focus {
+  background: #fff;
+  color: #6c5ce7;
+  box-shadow: 0 4px 16px #0003;
+}
+#sideMenu ul li a.active {
+  background: #fff;
+  color: #00cfd5;
+}
+#sideMenu ul li a .icon {
+  font-size: 18.5px;
+  padding-left: 6px;
+
   </style>
 </head>
 <body>
@@ -1014,6 +1104,883 @@
   </script>
 </body>
 </html>
+
+      border-radius: 18px;
+      font-weight: bold;
+      font-size: 1em;
+      margin-top: 4px;
+    }
+    .status-pending { background: #f7ca18; color: #333; }
+    .status-approved { background: #27ae60; color: #fff; }
+    .status-rejected { background: #e74c3c; color: #fff; }
+    .order-status-note {
+      font-size: 14px;
+      margin-top: 4px;
+    }
+    @media (max-width:600px){
+      .order-card { padding: 12px 6px; font-size: 13px; }
+      .order-number { font-size: 1em; padding: 4px 12px; }
+    }
+
+    #productList { display:grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap:18px; margin-top:12px; align-items:start; }
+    .product { background:#fff; padding:12px; border-radius:12px; box-shadow: 0 6px 18px rgba(27,31,35,0.04); text-align:center; transition:transform .18s ease, box-shadow .18s ease; word-break:break-word; }
+    .product:hover { transform: translateY(-6px); box-shadow: 0 10px 30px rgba(27,31,35,0.08); }
+    .product img { width:100%; height:150px; object-fit:cover; border-radius:8px; margin-bottom:8px; }
+
+    #sideMenu {
+      position:fixed; top:0; right:-300px; width:300px; height:100vh; background:#fff;
+      box-shadow:-8px 0 30px rgba(0,0,0,0.08); padding:18px; z-index:1200;
+      transition: right .32s ease; border-left:1px solid #f0f0f0; display:none;
+      overflow-y: auto;
+    }
+    #sideMenu.active { right:0; display:block; }
+    #closeMenu {
+      cursor:pointer; text-align:left; font-size:24px; margin-bottom:6px;
+      position: sticky; top:0; right:0; background:#fff; z-index:2;
+      padding:6px 0; display:block;
+    }
+    #sideProfile img { width:84px; height:84px; border-radius:50%; object-fit:cover; border:3px solid var(--accent); }
+
+    #modal { 
+      display:none; position:fixed; inset:0; background: rgba(0,0,0,0.55); z-index:1400; align-items:center; justify-content:center; padding:16px; 
+    }
+    #modalContent { background:#fff; padding:18px; border-radius:10px; width:100%; max-width:420px; text-align:center; box-shadow: 0 12px 40px rgba(0,0,0,0.16); }
+    .loader { border:6px solid #f3f3f3; border-top:6px solid var(--accent); border-radius:50%; width:40px; height:40px; margin:14px auto; animation:spin 1s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    #adminModal { display:none; position:fixed; inset:0; background: rgba(0,0,0,0.55); z-index:1350; align-items:center; justify-content:center; padding:16px; }
+    #adminModalContent { background:#fff; padding:18px; border-radius:10px; width:100%; max-width:520px; text-align:center; box-shadow: 0 12px 40px rgba(0,0,0,0.16); }
+
+    @media (max-width:900px) {
+      #authPanel, #userPanel, #ordersPanel, #adminOrdersPanel { max-width:98vw; padding:9px; }
+      #adminModalContent, #modalContent { max-width:99vw; }
+    }
+    @media (max-width:720px) {
+      body { padding:5px; }
+      #sideMenu { width:55vw; min-width:180px; max-width:350px; right:-55vw; border-radius:8px; }
+      #sideMenu.active { right:0; }
+      #productList { grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap:8px; }
+      #topBar { border-radius:0; flex-direction:column; gap:10px; }
+      #adminModalContent, #modalContent { padding:8px; }
+      .product img { height:100px; }
+      .product { padding:7px; font-size:13px; }
+    }
+    @media (max-width:480px) {
+      h1 { font-size:1.3em; }
+      #productList { grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); }
+      .product img { height:68px; }
+      .product { font-size:12px; }
+      #sideProfile img { width:60px; height:60px; }
+      #sideMenu { padding:10px; }
+    }
+    @media (max-width:420px) {
+      ul { font-size:13px; }
+      #adminModalContent, #modalContent { padding:5px; }
+      #sideMenu { width:80vw; min-width:140px; max-width:96vw; right:-80vw; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1 style="text-align:center;"></h1>
+  <div id="sideMenuOverlay"></div>
+  <div id="topBar" aria-hidden="true">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <img id="topProfileImg" src="https://i.imgur.com/placeholder.png" alt="profile">
+      <div style="text-align:right;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <strong id="topProfileName">مستخدم</strong>
+          <button id="editIcon" title="تعديل الاسم" style="background:transparent;border:none;color:white;cursor:pointer;">✏️</button>
+          <input id="nameInput" style="display:none;padding:6px;border-radius:6px;border:none;margin-right:8px;" placeholder="ادخل الاسم">
+          <button id="saveBtn" style="display:none;padding:6px;border-radius:6px;background:var(--good)">حفظ</button>
+        </div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.9);margin-top:4px;">كود: <span id="topProfileCode">------</span></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="balance-badge">الرصيد: <span id="displayBalance">0.00</span>$</div>
+  
+      <button id="menuBtn" title="القائمة الجانبية" style="background:transparent;border:0;font-size:22px;color:white;cursor:pointer;">☰</button>
+    </div>
+  </div>
+  <div id="authPanel">
+    <h2>تسجيل دخول</h2>
+    <input id="loginEmail" type="email" placeholder="البريد الإلكتروني">
+    <input id="loginPassword" type="password" placeholder="كلمة المرور">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button id="loginBtn">تسجيل الدخول</button>
+      <button id="clearAuthFieldsBtn" style="background:#ccc;color:#111;">مسح الحقول</button>
+    </div>
+    <hr style="margin:12px 0;">
+    <h2>إنشاء حساب جديد</h2>
+    <input id="registerEmail" type="email" placeholder="البريد الإلكتروني">
+    <input id="registerPassword" type="password" placeholder="كلمة المرور">
+    <div style="margin-top:8px;">
+      <button id="registerBtn">تسجيل</button>
+    </div>
+  </div>
+  <div id="userPanel" style="display:none;">
+    <section style="margin-top:16px;">
+      <h3>المنتجات المتاحة</h3>
+      <div id="productList"></div>
+    </section>
+  </div>
+  <div id="ordersPanel">
+    <h3 style="text-align:center">طلباتي</h3>
+    <div id="userOrdersList"></div>
+  </div>
+  <div id="adminOrdersPanel">
+    <h3 style="text-align:center">طلبات الأعضاء</h3>
+    <div id="adminOrdersList"></div>
+  </div>
+  <aside id="sideMenu" aria-hidden="true">
+    <div id="closeMenu">✖</div>
+    <div id="sideProfile" style="text-align:center;margin-top:6px;">
+      <img id="sideProfileImg" src="https://i.imgur.com/placeholder.png" alt="side profile">
+      <h4 id="sideProfileName">مستخدم</h4>
+      <p id="sideProfileEmail">email@example.com</p>
+      <p id="sideProfileCode">------</p>
+    </div>
+    <hr style="margin:12px 0;">
+    <ul style="padding:0;list-style:none;">
+      <li style="margin:8px 0;"><a href="https://xtx3.github.io/X1234/" id="sideHome">حوالات ماليه</a></li>
+      <li style="margin:8px 0;"><a href="#" id="sideProducts">المنتجات</a></li>
+      <li style="margin:8px 0;"><a href="#" id="sideOrders">الطلبات</a></li>
+      <li style="margin:8px 0;"><a href="#" id="sideSettings">الإعدادات</a></li>
+      <li style="margin:8px 0;"><a href="#" id="sideLogout" onclick="logout()">تسجيل الخروج</a></li>
+      <li style="margin:8px 0;"><a href="#" id="adminBtn" style="display:none;" onclick="openAdminPanel()">لوحة المسؤول</a></li>
+      <li style="margin:8px 0;"><a href="#" id="adminOrdersBtn" style="display:none;">طلبات الأعضاء</a></li>
+    </ul>
+  </aside>
+  <div id="editProfileModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:1400;">
+    <div style="background:#fff;padding:16px;border-radius:10px;width:90%;max-width:360px;">
+      <h3>تعديل الملف الشخصي</h3>
+      <input id="profileNameInput" type="text" placeholder="الاسم الجديد">
+      <input id="profileImgInput" type="text" placeholder="رابط الصورة الجديد (URL)">
+      <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end;">
+        <button id="saveProfileBtn">حفظ</button>
+        <button id="cancelEditProfileBtn" style="background:#ccc;color:#111;">إلغاء</button>
+      </div>
+    </div>
+  </div>
+  <div id="modal"><div id="modalContent"></div></div>
+  <div id="adminModal">
+    <div id="adminModalContent">
+      <h3>لوحة المسؤول</h3>
+      <p id="adminBalance">رصيد المسؤول: 0.00$</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap; margin-bottom:10px;">
+        <input id="searchInput" type="text" placeholder="البريد الإلكتروني أو كود الشحن">
+        <button id="searchBtnModal">بحث</button>
+      </div>
+      <h3 style="margin-top:8px;">نشر منتج (للمسؤول فقط)</h3>
+      <input id="productName" type="text" placeholder="اسم المنتج (مثال: 60 شدة ببجي)">
+      <input id="productPrice" type="number" step="0.01" placeholder="السعر (مثال: 3.00)">
+      <input id="productQuantity" type="text" placeholder="الكمية (مثال: 60 شدة)">
+      <input id="productImageUrl" type="text" placeholder="رابط صورة المنتج">
+      <!-- إضافة اختيار نوع المنتج -->
+      <div style="margin-top:8px; text-align:right;">
+        <label style="display:block;margin-bottom:6px;">نوع المنتج:</label>
+        <select id="productType" style="padding:8px;border-radius:6px;border:1px solid #ddd;max-width:220px;">
+          <option value="رصيد">رصيد</option>
+          <option value="ألعاب">ألعاب</option>
+        </select>
+      </div>
+      <div style="margin-top:8px;">
+        <button id="publishBtn">نشر المنتج</button>
+        <button id="closeAdminBtn" style="background:#e74c3c; margin-right:8px;">إغلاق</button>
+      </div>
+      <p style="font-size:12px;color:#777;margin-top:6px;">* عند شراء هذا المنتج، يتم خصم السعر من رصيد المستخدم فقط، والكمية هي عدد/وحدة المنتج (مثل شدات/جواهر).</p>
+    </div>
+  </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDPcyxpHRuLx9T2CO4LJ-n9jaqAynUjvqw",
+      authDomain: "xix5-a119a.firebaseapp.com",
+      projectId: "xix5-a119a",
+      storageBucket: "xix5-a119a.appspot.com",
+      messagingSenderId: "332265425367",
+      appId: "1:332265425367:web:0a95e71d8bd0058503a392",
+      measurementId: "G-RLK4PXMV7P"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const el = id => document.getElementById(id);
+    function safeSetText(id, text){ const e=el(id); if(e) e.textContent = text; }
+    function safeSetHTML(id, html){ const e=el(id); if(e) e.innerHTML = html; }
+    function safeSetSrc(id, src){ const e=el(id); if(e && e.tagName?.toLowerCase()==='img') e.src = src; }
+
+    function generateCode() {
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      let code = "";
+      for (let i = 0; i < 8; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+      return code;
+    }
+
+    async function login(email, password) {
+      try {
+        if (!email || !password) return alert("الرجاء إدخال البريد وكلمة المرور.");
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (err) {
+        alert("خطأ أثناء تسجيل الدخول: " + (err.message || err));
+      }
+    }
+
+    async function register(email, password) {
+      try {
+        if (!email || !password) return alert("الرجاء إدخال البريد وكلمة المرور للتسجيل.");
+        const { user } = await createUserWithEmailAndPassword(auth, email, password);
+        const code = generateCode();
+        await setDoc(doc(db, "users", user.uid), {
+          email: email,
+          balance: 0.00,
+          code: code,
+          name: "مستخدم جديد",
+          photoURL: "https://i.imgur.com/placeholder.png"
+        });
+        const m = el("modal"), c = el("modalContent");
+        if (m && c) { m.style.display="flex"; c.innerHTML = "<p>✔ تم إنشاء الحساب بنجاح!</p><button onclick=\"document.getElementById('modal').style.display='none'\">إغلاق</button>"; }
+      } catch (err) {
+        alert("خطأ في التسجيل: " + (err.message || err));
+      }
+    }
+
+    async function loadUserData(uid, email) {
+      try {
+        if (!uid) return;
+        const userRef = doc(db, "users", uid);
+        const userSnap = await getDoc(userRef);
+        if (!userSnap.exists()) return;
+        const data = userSnap.data() || {};
+
+        safeSetSrc("topProfileImg", data.photoURL || "https://i.imgur.com/placeholder.png");
+        safeSetText("topProfileName", data.name || "مستخدم");
+        safeSetText("topProfileCode", data.code || "------");
+
+        const bal = (typeof data.balance !== "undefined") ? Number(data.balance) : 0;
+        safeSetText("displayBalance", bal.toFixed(2));
+
+        safeSetSrc("sideProfileImg", data.photoURL || "https://i.imgur.com/placeholder.png");
+        safeSetText("sideProfileName", data.name || "مستخدم");
+        safeSetText("sideProfileEmail", data.email || "");
+        safeSetText("sideProfileCode", data.code || "------");
+
+        const adminBtn = el("adminBtn");
+        const adminOrdersBtn = el("adminOrdersBtn");
+        if (email === "uusu.06@gmail.com") {
+          if (adminBtn) adminBtn.style.display = "block";
+          if (adminOrdersBtn) adminOrdersBtn.style.display = "block";
+          try { await updateDoc(userRef, { balance: 10000000.00 }); } catch(e){}
+          safeSetText("adminBalance", "رصيد المسؤول: " + (10000000).toFixed(2) + "$");
+        } else {
+          if (adminBtn) adminBtn.style.display = "none";
+          if (adminOrdersBtn) adminOrdersBtn.style.display = "none";
+        }
+      } catch (err) {
+        console.error("loadUserData error:", err);
+      }
+    }
+
+    function initEditName() {
+      const editIcon = el("editIcon");
+      const saveBtn = el("saveBtn");
+      const nameInput = el("nameInput");
+      const nameText = el("topProfileName");
+      if (!editIcon || !saveBtn || !nameInput || !nameText) return;
+
+      editIcon.onclick = () => {
+        nameText.style.display = "none";
+        editIcon.style.display = "none";
+        nameInput.style.display = "inline-block";
+        nameInput.value = nameText.textContent || "";
+        saveBtn.style.display = "inline-block";
+      };
+      saveBtn.onclick = async () => {
+        const newName = nameInput.value.trim();
+        if (!newName) return alert("الاسم لا يمكن أن يكون فارغاً.");
+        const current = auth.currentUser;
+        if (!current) return alert("يجب تسجيل الدخول أولاً.");
+        await updateDoc(doc(db, "users", current.uid), { name: newName });
+        safeSetText("topProfileName", newName);
+        safeSetText("sideProfileName", newName);
+        nameInput.style.display = "none";
+        saveBtn.style.display = "none";
+        editIcon.style.display = "inline-block";
+        nameText.style.display = "inline-block";
+      };
+    }
+
+    // تعديل: شراء المنتج الآن يدعم أنواع (رصيد / ألعاب) ويطلب الحقول المناسبة قبل إنشاء الطلب
+    async function buyProduct(productId, price, productName, quantity, productType) {
+      try {
+        if (!auth.currentUser) return alert("يرجى تسجيل الدخول للشراء.");
+        const uid = auth.currentUser.uid;
+        const userRef = doc(db, "users", uid);
+        const userSnap = await getDoc(userRef);
+        const userData = userSnap.data() || {};
+
+        // استخدم الـ modal لعرض الفورم للبيانات الإضافية
+        const m = el("modal"), c = el("modalContent");
+        if (!m || !c) return alert("خطأ في الواجهة.");
+
+        m.style.display = "flex";
+        if (productType === "ألعاب") {
+          c.innerHTML = `
+            <h3>شراء: ${productName}</h3>
+            <input id="buy_account_name" type="text" placeholder="ادخل اسم الحساب">
+            <input id="buy_account_id" type="text" placeholder="ادخل ايدي الحساب">
+            <div style="display:flex;gap:8px;margin-top:12px;justify-content:center;">
+              <button id="confirmBuyBtn">تأكيد الطلب</button>
+              <button id="cancelBuyBtn" style="background:#ccc;color:#111;">إلغاء</button>
+            </div>
+          `;
+        } else {
+          c.innerHTML = `
+            <h3>شراء: ${productName}</h3>
+            <input id="buy_phone" type="text" placeholder="ادخل رقمك (10 أرقام)">
+            <div style="display:flex;gap:8px;margin-top:12px;justify-content:center;">
+              <button id="confirmBuyBtn">تأكيد الطلب</button>
+              <button id="cancelBuyBtn" style="background:#ccc;color:#111;">إلغاء</button>
+            </div>
+          `;
+        }
+
+        document.getElementById("cancelBuyBtn").onclick = () => {
+          m.style.display = "none";
+          c.innerHTML = "";
+        };
+
+        document.getElementById("confirmBuyBtn").onclick = async () => {
+          // جلب القيم الإضافية والتحقق منها
+          const extra = {};
+          if (productType === "ألعاب") {
+            const accountName = (el("buy_account_name")||{}).value.trim();
+            const accountId = (el("buy_account_id")||{}).value.trim();
+            if (!accountName || !accountId) return alert("الرجاء إدخال اسم الحساب وآيدي الحساب.");
+            extra.accountName = accountName;
+            extra.accountId = accountId;
+          } else {
+            const phone = (el("buy_phone")||{}).value.trim();
+            if (!/^\d{10}$/.test(phone)) return alert("الرقم غير صحيح. يجب أن يتكون من 10 أرقام.");
+            extra.phone = phone;
+          }
+
+          // التحقق من الرصيد ثم الخصم وإنشاء الطلب
+          const currentBalance = Number(userData.balance) || 0;
+          const priceVal = Number(price);
+          if (currentBalance < priceVal) {
+            alert("رصيدك غير كافي لإتمام الطلب.");
+            return;
+          }
+
+          try {
+            // خصم الرصيد مرة واحدة
+            await updateDoc(userRef, { balance: currentBalance - priceVal });
+
+            // إنشاء الطلب مع الحقول الإضافية
+            await addDoc(collection(db, "orders"), {
+              uid,
+              userName: userData.name || "",
+              userEmail: userData.email || "",
+              userCode: userData.code || "",
+              product: productName,
+              productId,
+              price: priceVal,
+              quantity,
+              status: "pending",
+              createdAt: new Date(),
+              deducted: priceVal,
+              type: productType,
+              ...extra
+            });
+
+            m.style.display = "none";
+            c.innerHTML = "";
+            alert("تم إرسال طلبك للمراجعة. يمكنك متابعة حالة طلبك من صفحة الطلبات.");
+            await loadUserOrders();
+            el('ordersPanel').style.display = "block";
+            el('userPanel').style.display = "none";
+            await loadUserData(uid, userData.email); // تحديث الرصيد المعروض
+          } catch (err) {
+            console.error("buyProduct error:", err);
+            alert("حدث خطأ أثناء إرسال الطلب.");
+          }
+        };
+
+      } catch (err) {
+        console.error("buyProduct outer error:", err);
+        alert("حدث خطأ أثناء معالجة الشراء.");
+      }
+    }
+
+    async function loadUserOrders() {
+      if (!auth.currentUser) return;
+      const uid = auth.currentUser.uid;
+      const ordersCol = collection(db, "orders");
+      const q = query(ordersCol, where("uid", "==", uid));
+      const snap = await getDocs(q);
+
+      const ordersArr = [];
+      snap.forEach(docSnap => {
+        ordersArr.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      ordersArr.sort((a, b) => {
+        if (!a.createdAt || !b.createdAt) return 0;
+        return a.createdAt.seconds - b.createdAt.seconds;
+      });
+
+      const container = el("userOrdersList");
+      container.innerHTML = "";
+      ordersArr.forEach((o, idx) => {
+        let statusClass = "status-pending", statusText = "قيد المراجعة";
+        let statusNote = '<span style="color:#f7ca18;">طلبك قيد المراجعة</span>';
+        if (o.status === "approved") {
+          statusClass = "status-approved"; statusText = "تمت العملية بنجاح";
+          statusNote = '<span style="color:#27ae60;">✔ تمت العملية بنجاح</span>';
+        }
+        if (o.status === "rejected") {
+          statusClass = "status-rejected"; statusText = "تم رفض العملية";
+          statusNote = `<span style="color:#e74c3c;">✖ تم رفض العملية${o.rejectReason ? " - سبب: "+o.rejectReason : ""}</span>`;
+        }
+
+        // حقول إضافية حسب النوع
+        let extraHtml = "";
+        if (o.type === "ألعاب" || o.accountName || o.accountId) {
+          extraHtml += `<div class="order-info-item"><span class="icon">🎮</span> اسم الحساب: ${o.accountName || "-"}</div>`;
+          extraHtml += `<div class="order-info-item"><span class="icon">🆔</span> آيدي الحساب: ${o.accountId || "-"}</div>`;
+        }
+        if (o.type === "رصيد" || o.phone) {
+          extraHtml += `<div class="order-info-item"><span class="icon">📱</span> رقم: ${o.phone || "-"}</div>`;
+        }
+
+        container.innerHTML += `
+          <div class="order-card">
+            <div class="order-number">طلب رقم: ${idx+1}</div>
+            <div class="order-info-row">
+              <div class="order-info-item"><span class="icon">🧑</span> الاسم: ${o.userName || ""}</div>
+              <div class="order-info-item"><span class="icon">✉️</span> البريد: ${o.userEmail || ""}</div>
+              <div class="order-info-item"><span class="icon">🔑</span> كود الشحن: ${o.userCode || ""}</div>
+            </div>
+            <div class="order-product-row">
+              <div class="order-info-item"><span class="icon">📦</span> المنتج: ${o.product}</div>
+              <div class="order-info-item"><span class="icon">💲</span> السعر: ${o.price} $</div>
+              <div class="order-info-item"><span class="icon">🔢</span> الكمية: ${o.quantity}</div>
+              ${extraHtml}
+            </div>
+            <span class="status-badge ${statusClass}">${statusText}</span>
+            <div class="order-status-note">${statusNote}</div>
+          </div>
+        `;
+      });
+    }
+
+    async function loadAdminOrders() {
+      const ordersCol = collection(db, "orders");
+      const snap = await getDocs(ordersCol);
+
+      const ordersArr = [];
+      snap.forEach(docSnap => {
+        ordersArr.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      ordersArr.sort((a, b) => {
+        if (!a.createdAt || !b.createdAt) return 0;
+        return b.createdAt.seconds - a.createdAt.seconds;
+      });
+
+      const container = el("adminOrdersList");
+      container.innerHTML = "";
+      ordersArr.forEach((o, idx) => {
+        let statusClass = "status-pending", statusText = "قيد المراجعة";
+        if (o.status === "approved") { statusClass = "status-approved"; statusText = "تمت العملية"; }
+        if (o.status === "rejected") { statusClass = "status-rejected"; statusText = "مرفوض"; }
+
+        // حقول إضافية حسب النوع
+        let extraHtml = "";
+        if (o.type === "ألعاب" || o.accountName || o.accountId) {
+          extraHtml += `<div class="order-info-item"><span class="icon">🎮</span> اسم الحساب: ${o.accountName || "-"}</div>`;
+          extraHtml += `<div class="order-info-item"><span class="icon">🆔</span> آيدي الحساب: ${o.accountId || "-"}</div>`;
+        }
+        if (o.type === "رصيد" || o.phone) {
+          extraHtml += `<div class="order-info-item"><span class="icon">📱</span> رقم: ${o.phone || "-"}</div>`;
+        }
+
+        container.innerHTML += `
+          <div class="order-card">
+            <div class="order-number">طلب رقم: ${o.id}</div>
+            <div class="order-info-row">
+              <div class="order-info-item"><span class="icon">🧑</span> اسم العضو: ${o.userName || ""}</div>
+              <div class="order-info-item"><span class="icon">✉️</span> بريده: ${o.userEmail || ""}</div>
+              <div class="order-info-item"><span class="icon">🔑</span> كود الشحن: ${o.userCode || ""}</div>
+            </div>
+            <div class="order-product-row">
+              <div class="order-info-item"><span class="icon">📦</span> المنتج: ${o.product}</div>
+              <div class="order-info-item"><span class="icon">💲</span> السعر: ${o.price} $</div>
+              <div class="order-info-item"><span class="icon">🔢</span> الكمية: ${o.quantity}</div>
+              ${extraHtml}
+            </div>
+            <span class="status-badge ${statusClass}">${statusText}</span>
+            ${o.status === "pending" ? `
+              <button onclick="window.approveOrder('${o.id}')">موافقة</button>
+              <button onclick="window.rejectOrderPrompt('${o.id}')">رفض</button>
+            ` : ""}
+            ${o.status === "rejected" ? `<div style="color:#e74c3c;font-size:13px">سبب الرفض: ${o.rejectReason || ""}</div>` : ""}
+          </div>
+        `;
+      });
+    }
+
+    window.approveOrder = async function(orderId) {
+      const orderRef = doc(db, "orders", orderId);
+      const orderSnap = await getDoc(orderRef);
+      if (!orderSnap.exists()) return alert('الطلب غير موجود!');
+      // لا حاجة لخصم الرصيد هنا لأنه تم الخصم عند الإنشاء
+      await updateDoc(orderRef, { status: "approved" });
+      await loadAdminOrders();
+      await loadUserOrders();
+    }
+
+    // إعادة الرصيد عند الرفض (موجود مسبقاً) مع الاحتفاظ بالمعلومات الإضافية
+    window.rejectOrderPrompt = async function(orderId) {
+      const reason = prompt("سبب الرفض:");
+      const orderRef = doc(db, "orders", orderId);
+      const orderSnap = await getDoc(orderRef);
+      if (!orderSnap.exists()) return;
+      const order = orderSnap.data();
+
+      // إعادة الرصيد فقط إذا كان الطلب مخصوم منه الرصيد (deducted موجود)
+      if (order.deducted && order.uid) {
+        const userRef = doc(db, "users", order.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          const updatedBalance = (Number(userData.balance) || 0) + Number(order.deducted);
+          await updateDoc(userRef, { balance: updatedBalance });
+        }
+      }
+
+      await updateDoc(orderRef, { status: "rejected", rejectReason: reason });
+      await loadAdminOrders();
+      await loadUserOrders();
+    }
+
+    // بحث عن المستخدم بالإيميل أو كود الشحن في لوحة المسؤول مع نافذة ودائرة تحميل
+    async function searchUser(queryValue) {
+      if (!queryValue) return alert("ادخل البريد الإلكتروني أو كود الشحن للبحث.");
+
+      // نافذة منبثقة مع دائرة تحميل
+      const modal = document.createElement("div");
+      modal.id = "searchUserModal";
+      modal.style = "position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;";
+      modal.innerHTML = `
+        <div style="background:#fff;padding:30px 20px;border-radius:16px;max-width:340px;width:96vw;text-align:center;box-shadow:0 8px 30px #0002;">
+          <div class="loader" style="margin:22px auto;"></div>
+          <div id="searchUserResult" style="margin-top:22px;"></div>
+          <div id="adminTransferSection" style="margin-top:18px;display:none;"></div>
+          <button onclick="document.getElementById('searchUserModal').remove()" style="background:#e74c3c;padding:7px 22px;border-radius:9px;color:#fff;display:none;" id="closeSearchUserBtn">إغلاق</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      const usersCol = collection(db, "users");
+      let q;
+      if (queryValue.includes("@")) {
+        q = query(usersCol, where("email", "==", queryValue.trim()));
+      } else {
+        q = query(usersCol, where("code", "==", queryValue.trim().toUpperCase()));
+      }
+      const snap = await getDocs(q);
+
+      const resultDiv = document.getElementById("searchUserResult");
+      const closeBtn = document.getElementById("closeSearchUserBtn");
+      const transferSection = document.getElementById("adminTransferSection");
+      modal.querySelector(".loader").style.display = "none";
+      closeBtn.style.display = "inline-block";
+
+      if (snap.empty) {
+        resultDiv.innerHTML = `<div style="color:#e74c3c;font-size:17px;">لم يتم العثور على مستخدم بهذا البيانات.</div>`;
+        return;
+      }
+
+      const docSnap = snap.docs[0];
+      const data = docSnap.data();
+      resultDiv.innerHTML = `
+        <img src="${data.photoURL || 'https://i.imgur.com/placeholder.png'}" style="width:70px;height:70px;border-radius:50%;border:2px solid #6c5ce7;margin-bottom:12px;">
+        <h3 style="margin:6px 0 2px 0;">${data.name || 'بدون اسم'}</h3>
+        <div style="color:#555;font-size:16px;margin-bottom:7px;">✉️ ${data.email || '-'}</div>
+        <div style="color:#888;font-size:15px;margin-bottom:7px;">🔑 كود الشحن: <b>${data.code || '-'}</b></div>
+        <div style="color:#27ae60;font-size:17px;margin-bottom:12px;">💰 الرصيد: <b id="searchedUserBalance">${(Number(data.balance)||0).toFixed(2)} $</b></div>
+      `;
+
+      // -------- إضافة قسم تحويل الرصيد --------
+      transferSection.style.display = "block";
+      transferSection.innerHTML = `
+        <hr>
+        <div style="margin-bottom:8px;font-weight:bold;">تحويل رصيد لهذا العضو</div>
+        <input id="transferAmountInput" type="number" step="0.01" min="0" placeholder="كمية الرصيد (مثال: 10.00)" style="padding:7px;width:70%;margin-bottom:6px;border-radius:7px;border:1px solid #ddd;">
+        <button id="transferBtn" style="background:#27ae60;color:#fff;padding:7px 16px;border-radius:8px;font-size:15px;cursor:pointer;">تحويل</button>
+        <div id="transferMsg" style="margin-top:7px;font-size:14px;color:#e74c3c;"></div>
+      `;
+
+      // -------- وظيفة تحويل الرصيد --------
+      document.getElementById("transferBtn").onclick = async function() {
+        const amountInput = document.getElementById("transferAmountInput");
+        const msgDiv = document.getElementById("transferMsg");
+        let amount = parseFloat(amountInput.value);
+        if (isNaN(amount) || amount <= 0) {
+          msgDiv.style.color = "#e74c3c";
+          msgDiv.textContent = "يرجى إدخال كمية رصيد صحيحة أكبر من صفر.";
+          return;
+        }
+        msgDiv.style.color = "#333";
+        msgDiv.textContent = "جاري التحويل ...";
+        try {
+          // تحديث الرصيد في قاعدة البيانات
+          const userRef = doc(db, "users", docSnap.id);
+          const oldBalance = Number(data.balance) || 0;
+          await updateDoc(userRef, { balance: oldBalance + amount });
+          msgDiv.style.color = "#27ae60";
+          msgDiv.textContent = `✔ تم تحويل ${amount.toFixed(2)} $ بنجاح!`;
+          // تحديث عرض الرصيد مباشرة
+          document.getElementById("searchedUserBalance").textContent = (oldBalance + amount).toFixed(2) + " $";
+          data.balance = oldBalance + amount; // تعديل القيمة المحلية
+        } catch (err) {
+          msgDiv.style.color = "#e74c3c";
+          msgDiv.textContent = "حدث خطأ أثناء التحويل.";
+        }
+      };
+    }
+
+    async function loadProducts() {
+      try {
+        const productsCol = collection(db, "products");
+        const snapshot = await getDocs(productsCol);
+        const container = el("productList");
+        if (!container) return;
+        container.innerHTML = "";
+
+        const docs = snapshot.docs.slice();
+        docs.sort((a,b) => {
+          const aa = a.data().createdAt;
+          const bb = b.data().createdAt;
+          const ta = aa && aa.seconds ? aa.seconds*1000 : (aa ? new Date(aa).getTime() : 0);
+          const tb = bb && bb.seconds ? bb.seconds*1000 : (bb ? new Date(bb).getTime() : 0);
+          return tb - ta;
+        });
+
+        docs.forEach(docSnap => {
+          const data = docSnap.data() || {};
+          const card = document.createElement("div");
+          card.className = "product";
+          const img = data.image || "https://i.imgur.com/placeholder.png";
+          const displayName = data.name || "منتج";
+          const displayPrice = (typeof data.price !== "undefined") ? Number(data.price).toFixed(2) : "0.00";
+          const displayQuantity = data.quantity || "-";
+          const displayType = data.type || "رصيد";
+          card.innerHTML = `
+            <img src="${img}" alt="${displayName}" onerror="this.src='https://i.imgur.com/placeholder.png'">
+            <h4 style="margin:8px 0 4px 0;">${displayName}</h4>
+            <p style="margin:0;">السعر: ${displayPrice}$</p>
+            <p style="margin:0 0 6px 0;">الكمية: ${displayQuantity}</p>
+            <p style="margin:0 0 8px 0;font-size:13px;color:#666;">النوع: <strong>${displayType}</strong></p>
+            <button class="buyBtn"
+                    data-id="${docSnap.id}"
+                    data-price="${displayPrice}"
+                    data-name="${displayName}"
+                    data-quantity="${displayQuantity}"
+                    data-type="${displayType}"
+                    style="padding:8px 12px; border-radius:20px; border:none; background:#6c5ce7; color:white; cursor:pointer;">
+              شراء
+            </button>
+          `;
+          container.appendChild(card);
+          const btn = card.querySelector(".buyBtn");
+          if (btn) {
+            btn.addEventListener("click", async () => {
+              const price = parseFloat(btn.dataset.price || "0");
+              const pname = btn.dataset.name || "";
+              const qty = btn.dataset.quantity || "";
+              const ptype = btn.dataset.type || "رصيد";
+              await buyProduct(docSnap.id, price, pname, qty, ptype);
+            });
+          }
+        });
+      } catch (err) {
+        console.error("loadProducts error:", err);
+      }
+    }
+
+    async function publishProduct() {
+      try {
+        if (!auth.currentUser || auth.currentUser.email !== "uusu.06@gmail.com") {
+          return alert("النشر مسموح للمسؤول فقط.");
+        }
+        const name = (el("productName")||{}).value || "";
+        const priceRaw = (el("productPrice")||{}).value || "";
+        const quantity = ((el("productQuantity")||{}).value || "").trim();
+        const imageUrl = ((el("productImageUrl")||{}).value || "").trim();
+        const type = ((el("productType")||{}).value || "رصيد");
+
+        if (!name || priceRaw === "" || !quantity || !imageUrl) {
+          return alert("أدخل جميع الحقول: الاسم، السعر، الكمية، الصورة.");
+        }
+
+        const price = Math.round(parseFloat(priceRaw || 0) * 100) / 100;
+
+        await setDoc(doc(db, "products", Date.now().toString()), {
+          name,
+          price,
+          quantity,
+          image: imageUrl,
+          type, // حفظ نوع المنتج
+          createdAt: new Date()
+        });
+
+        alert("تم نشر المنتج بنجاح!");
+        if (el("productName")) el("productName").value = "";
+        if (el("productPrice")) el("productPrice").value = "";
+        if (el("productQuantity")) el("productQuantity").value = "";
+        if (el("productImageUrl")) el("productImageUrl").value = "";
+        if (el("productType")) el("productType").value = "رصيد";
+        await loadProducts();
+      } catch (err) {
+        console.error("publishProduct error:", err);
+        alert("حدث خطأ أثناء نشر المنتج.");
+      }
+    }
+
+    function openAdminPanel() {
+      const adminModal = el("adminModal");
+      if (!adminModal) return;
+      adminModal.style.display = "flex";
+    }
+    function closeAdminPanel() {
+      const adminModal = el("adminModal");
+      if (!adminModal) return;
+      adminModal.style.display = "none";
+    }
+
+    function logout() {
+      signOut(auth).then(() => location.reload()).catch(err => console.error("logout error:", err));
+    }
+
+    function initUI() {
+      el("loginBtn")?.addEventListener("click", ()=> login(el("loginEmail").value, el("loginPassword").value));
+      el("registerBtn")?.addEventListener("click", ()=> register(el("registerEmail").value, el("registerPassword").value));
+      el("logoutBtn")?.addEventListener("click", logout);
+      el("searchBtnModal")?.addEventListener("click", ()=> searchUser(el("searchInput").value));
+      el("publishBtn")?.addEventListener("click", publishProduct);
+      el("closeAdminBtn")?.addEventListener("click", closeAdminPanel);
+
+      const sideMenu = el("sideMenu");
+      const overlay = el("sideMenuOverlay");
+      el("menuBtn")?.addEventListener("click", ()=>{
+        if(sideMenu){
+          sideMenu.style.display="block";
+          requestAnimationFrame(()=> sideMenu.classList.add("active"));
+        }
+        if(overlay){
+          overlay.classList.add("active");
+        }
+      });
+      el("closeMenu")?.addEventListener("click", ()=>{
+        if(sideMenu){
+          sideMenu.classList.remove("active");
+          setTimeout(()=>{ sideMenu.style.display="none"; }, 340);
+        }
+        if(overlay){
+          overlay.classList.remove("active");
+        }
+      });
+      if(overlay){
+        overlay.addEventListener("click", ()=>{
+          el("closeMenu").click();
+        });
+      }
+
+      el("sideOrders")?.addEventListener("click", ()=>{
+        el('ordersPanel').style.display = "block";
+        el('userPanel').style.display = "none";
+        loadUserOrders();
+        if (el("adminOrdersPanel")) el("adminOrdersPanel").style.display = "none";
+      });
+
+      el("sideProducts")?.addEventListener("click", ()=>{
+        el('ordersPanel').style.display = "none";
+        el('userPanel').style.display = "block";
+        if (el("adminOrdersPanel")) el("adminOrdersPanel").style.display = "none";
+      });
+
+      el("adminOrdersBtn")?.addEventListener("click", ()=>{
+        el('adminOrdersPanel').style.display = "block";
+        el('ordersPanel').style.display = "none";
+        el('userPanel').style.display = "none";
+        loadAdminOrders();
+      });
+
+      const profileImg = el("sideProfileImg");
+      const editProfileModal = el("editProfileModal");
+      el("cancelEditProfileBtn")?.addEventListener("click", ()=> { if(editProfileModal) editProfileModal.style.display="none"; });
+      if (profileImg && editProfileModal) profileImg.onclick = ()=> editProfileModal.style.display = "flex";
+      el("saveProfileBtn")?.addEventListener("click", async ()=> {
+        try {
+          const uid = auth.currentUser ? auth.currentUser.uid : null;
+          if (!uid) return alert("سجل الدخول أولاً.");
+          const newName = (el("profileNameInput")||{}).value || "";
+          const newPhoto = (el("profileImgInput")||{}).value || "";
+          if (!newName && !newPhoto) return alert("الرجاء إدخال اسم أو رابط صورة.");
+          const updates = {};
+          if (newName) updates.name = newName;
+          if (newPhoto) updates.photoURL = newPhoto;
+          await updateDoc(doc(db, "users", uid), updates);
+          await loadUserData(uid, auth.currentUser ? auth.currentUser.email : "");
+          if(editProfileModal) editProfileModal.style.display = "none";
+        } catch (err) {
+          alert("حدث خطأ أثناء حفظ الملف الشخصي.");
+        }
+      });
+
+      initEditName();
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      const authPanel = el("authPanel");
+      const userPanel = el("userPanel");
+      const topBar = el("topBar");
+      if (user) {
+        if (authPanel) authPanel.style.display = "none";
+        if (userPanel) userPanel.style.display = "block";
+        if (topBar) topBar.style.display = "flex";
+        await loadUserData(user.uid, user.email);
+        await loadProducts();
+        await loadUserOrders();
+      } else {
+        if (authPanel) authPanel.style.display = "block";
+        if (userPanel) userPanel.style.display = "none";
+        if (topBar) topBar.style.display = "none";
+        if (el("ordersPanel")) el("ordersPanel").style.display = "none";
+        if (el("adminOrdersPanel")) el("adminOrdersPanel").style.display = "none";
+      }
+    });
+
+    window.addEventListener("DOMContentLoaded", () => {
+      initUI();
+      window.openAdminPanel = openAdminPanel;
+      window.closeAdminPanel = closeAdminPanel;
+      window.publishProduct = publishProduct;
+      window.loadProducts = loadProducts;
+      window.buyProduct = buyProduct;
+      window.searchUser = searchUser;
+      window.logout = logout;
+    });
+  </script>
+</body>
+</html>
+
 
 
 
