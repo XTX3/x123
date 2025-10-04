@@ -1,0 +1,5 @@
+
+User-agent: *
+Allow: /
+Sitemap: https://xtx3.github.io/x123/sitemap.xml
+Sitemap: https://xtx3.github.io/x123/sitemap.xml
