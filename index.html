@@ -1101,8 +1101,30 @@
       window.searchUser = searchUser;
       window.logout = logout;
     });
+    function closeSideMenu() {
+  const sideMenu = document.getElementById("sideMenu");
+  const overlay = document.getElementById("sideMenuOverlay");
+  if(sideMenu){
+    sideMenu.classList.remove("active");
+    setTimeout(()=>{ sideMenu.style.display="none"; }, 340);
+  }
+  if(overlay){
+    overlay.classList.remove("active");
+  }
+}
+
+// أضف هذا بعد تعريف initUI وقبل نهاية الاستدعاء
+document.querySelectorAll('#sideMenu ul li a').forEach(link => {
+  link.addEventListener('click', function(e) {
+    // إذا كان الزر من نوع تسجيل الخروج أو زر مسؤول قد يمنع الإفلات reload، تجاهله
+    if(this.id === 'sideLogout' || this.id === 'adminBtn') return;
+    closeSideMenu();
+  });
+});
+    
   </script>
 </body>
 </html>
+
 
 
