@@ -559,7 +559,7 @@
             <input id="buy_account_name" type="text" placeholder="ادخل اسم الحساب">
             <input id="buy_account_id" type="text" placeholder="ادخل ايدي الحساب">
             <div style="display:flex;gap:8px;margin-top:12px;justify-content:center;">
-              <button id="confirmBuyBtn">تأكيد الطلب</button>
+              <button id="confirmBuyBtn">تأكيد الطلب</buttn>
               <button id="cancelBuyBtn" style="background:#ccc;color:#111;">إلغاء</button>
             </div>
           `;
@@ -568,7 +568,7 @@
             <h3>شراء: ${productName}</h3>
             <input id="buy_phone" type="text" placeholder="ادخل رقمك (10 أرقام)">
             <div style="display:flex;gap:8px;margin-top:12px;justify-content:center;">
-              <button id="confirmBuyBtn">تأكيد الطلب</button>
+              <button id="confirmBuyBtn">تأكيد الطلب</button>o
               <button id="cancelBuyBtn" style="background:#ccc;color:#111;">إلغاء</button>
             </div>
           `;
@@ -579,8 +579,9 @@
           c.innerHTML = "";
         };
 
-        document.getElementById("confirmBuyBtn").onclick = async () => {
-          // جلب القيم الإضافية والتحقق منها
+      document.getElementById("confirmBuyBtn").onclick = async function () {
+  this.disabled = true; // تعطيل الزر فور النقر لتجنب التكرار
+
           const extra = {};
           if (productType === "ألعاب") {
             const accountName = (el("buy_account_name")||{}).value.trim();
@@ -1125,6 +1126,5 @@ document.querySelectorAll('#sideMenu ul li a').forEach(link => {
   </script>
 </body>
 </html>
-
 
 
