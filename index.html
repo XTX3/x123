@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <meta name="google-site-verification" content="bsz625Fk5LhSKZGojTuJJJlIHvAT9ZvfBSmM2akWRZw" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -98,8 +99,177 @@
     #topBar img { width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid rgba(255,255,255,0.2); }
     #topBar .balance-badge { background:gold; color:#222; padding:6px 12px; border-radius:20px; font-weight:bold; }
 
-    #authPanel, #userPanel { background:#fff; padding:16px; border-radius:10px; box-shadow:0 4px 16px rgba(0,0,0,0.05); margin-bottom:12px; max-width:1100px; margin-left:auto; margin-right:auto; width:92%; }
+ /* 💎 الأساس */
+* {
+  box-sizing: border-box;
+  font-family: "Cairo", sans-serif;
+  margin: 0;
+  padding: 0;
+}
+html, body {
+  height: 100%;
+   /* 🚫 منع التمرير أثناء شاشة تسجيل الدخول */
+}
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #6c5ce7 0%, #00cfd5 100%);
+}
+.auth-card {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 420px;
+  padding: 25px 20px 35px;
+  text-align: center;
+  animation: slideUp 0.5s ease;
+}
+.auth-banner {
+  width: 100%;
+  max-height: 170px;
+  object-fit: cover;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
 
+/* 🔹 التبويبات */
+.tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 22px;
+}
+.tab {
+  flex: 1;
+  padding: 12px;
+  cursor: pointer;
+  background: #f0f0f0;
+  border: none;
+  font-weight: 600;
+  transition: 0.25s;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+.tab.active {
+  background: linear-gradient(90deg,#6c5ce7,#00cfd5);
+  color: white;
+  transform: scale(1.03);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+}
+
+/* ✨ الحقول */
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.form-section.hidden {
+  display: none;
+}
+.input-group {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.input-group label {
+  font-size: 15px;
+  color: #444;
+  font-weight: 600;
+}
+.input-group label i {
+  margin-left: 6px;
+  color: #6c5ce7;
+}
+.input-group input {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1.8px solid #ddd;
+  transition: all 0.25s ease;
+  font-size: 16px;
+  outline: none;
+}
+.input-group input:focus {
+  border-color: #6c5ce7;
+  box-shadow: 0 0 6px rgba(108,92,231,0.3);
+}
+
+/* 👁 زر العين */
+.password-field {
+  position: relative;
+}
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #777;
+  font-size: 18px;
+  transition: 0.2s;
+}
+.toggle-password:hover {
+  color: #00cfd5;
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* 🔘 الأزرار */
+button {
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+  font-size: 1rem;
+  margin-top: 5px;
+}
+button.primary {
+  background: linear-gradient(90deg,#6c5ce7,#00cfd5);
+  color: white;
+}
+button.primary:hover {
+  box-shadow: 0 6px 20px rgba(108,92,231,0.4);
+  transform: translateY(-2px);
+}
+button.accent {
+  background: linear-gradient(90deg,#00cfd5,#6c5ce7);
+}
+button.accent:hover {
+  box-shadow: 0 6px 20px rgba(0,207,213,0.4);
+}
+
+/* ✨ الحركات */
+.hidden { display: none; }
+@keyframes fadeIn { from {opacity:0;transform:translateY(10px);} to {opacity:1;transform:translateY(0);} }
+.fadeIn { animation: fadeIn 0.5s ease; }
+@keyframes slideUp { from {transform:translateY(25px);opacity:0;} to {transform:translateY(0);opacity:1;} }
+
+/* 📱 التجاوب مع الجوال */
+@media (max-width: 600px) {
+  .auth-card {
+    max-width: 95%;
+    padding: 20px 15px 30px;
+  }
+  .auth-banner {
+    max-height: 140px;
+  }
+  .tab {
+    font-size: 14px;
+    padding: 10px;
+  }
+  .input-group input {
+    font-size: 15px;
+    padding: 11px;
+  }
+  button {
+    font-size: 15px;
+    padding: 11px;
+  }
+}
     #ordersPanel, #adminOrdersPanel {
       background: #fff; padding:18px; border-radius:10px; box-shadow:0 2px 12px #0001; max-width:700px; margin:20px auto; display:none;
     }
@@ -345,22 +515,56 @@
       <button id="menuBtn" title="القائمة الجانبية" style="background:transparent;border:0;font-size:22px;color:white;cursor:pointer;">☰</button>
     </div>
   </div>
-  <div id="authPanel">
-    <h2>تسجيل دخول</h2>
-    <input id="loginEmail" type="email" placeholder="البريد الإلكتروني">
-    <input id="loginPassword" type="password" placeholder="كلمة المرور">
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <button id="loginBtn">تسجيل الدخول</button>
-      <button id="clearAuthFieldsBtn" style="background:#ccc;color:#111;">مسح الحقول</button>
+ <!-- ✅ واجهة تسجيل الدخول / إنشاء حساب محسّنة ومتجاوبة -->
+<div id="authPanel" class="auth-container">
+  <div class="auth-card">
+    <!-- صورة علوية -->
+    <img src="https://i.imgur.com/X39feeD.jpeg" alt="login banner" class="auth-banner">
+
+    <!-- التبويبات -->
+    <div class="tabs">
+      <button id="loginTab" class="tab active">تسجيل الدخول</button>
+      <button id="registerTab" class="tab">إنشاء حساب جديد</button>
     </div>
-    <hr style="margin:12px 0;">
-    <h2>إنشاء حساب جديد</h2>
-    <input id="registerEmail" type="email" placeholder="البريد الإلكتروني">
-    <input id="registerPassword" type="password" placeholder="كلمة المرور">
-    <div style="margin-top:8px;">
-      <button id="registerBtn">تسجيل</button>
+
+    <!-- نموذج تسجيل الدخول -->
+    <div id="loginForm" class="form-section fadeIn">
+      <div class="input-group">
+        <label for="loginEmail"><i class="fa-solid fa-envelope"></i> البريد الإلكتروني</label>
+        <input id="loginEmail" type="email" placeholder="example@email.com" required>
+      </div>
+
+      <div class="input-group">
+        <label for="loginPassword"><i class="fa-solid fa-lock"></i> كلمة المرور</label>
+        <div class="password-field">
+          <input id="loginPassword" type="password" placeholder="••••••••" required>
+          <i id="loginEye" class="fa-solid fa-eye toggle-password"></i>
+        </div>
+      </div>
+
+      <button id="loginBtn" class="primary">تسجيل الدخول</button>
+    </div>
+
+    <!-- نموذج إنشاء الحساب -->
+    <div id="registerForm" class="form-section fadeIn hidden">
+      <div class="input-group">
+        <label for="registerEmail"><i class="fa-solid fa-envelope"></i> البريد الإلكتروني</label>
+        <input id="registerEmail" type="email" placeholder="example@email.com" required>
+      </div>
+
+      <div class="input-group">
+        <label for="registerPassword"><i class="fa-solid fa-lock"></i> كلمة المرور</label>
+        <div class="password-field">
+          <input id="registerPassword" type="password" placeholder="••••••••" required>
+          <i id="registerEye" class="fa-solid fa-eye toggle-password"></i>
+        </div>
+      </div>
+
+      <button id="registerBtn" class="primary accent">إنشاء الحساب</button>
     </div>
   </div>
+</div>
+
   <div id="userPanel" style="display:none;">
     <section style="margin-top:16px;">
       <h3>المنتجات المتاحة</h3>
@@ -1140,7 +1344,59 @@ document.querySelectorAll('#sideMenu ul li a').forEach(link => {
     closeSideMenu();
   });
 });
-    
+
+
+function togglePassword(inputId, icon) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  if (input.type === "password") {
+    input.type = "text";
+    icon.classList.replace("fa-eye", "fa-eye-slash");
+  } else {
+    input.type = "password";
+    icon.classList.replace("fa-eye-slash", "fa-eye");
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const loginTab = document.getElementById("loginTab");
+  const registerTab = document.getElementById("registerTab");
+  const loginForm = document.getElementById("loginForm");
+  const registerForm = document.getElementById("registerForm");
+
+  // عند البداية
+  registerForm.classList.add("hidden");
+  loginForm.classList.remove("hidden");
+
+  loginTab.onclick = () => {
+    loginTab.classList.add("active");
+    registerTab.classList.remove("active");
+    loginForm.classList.remove("hidden");
+    registerForm.classList.add("hidden");
+  };
+  registerTab.onclick = () => {
+    registerTab.classList.add("active");
+    loginTab.classList.remove("active");
+    registerForm.classList.remove("hidden");
+    loginForm.classList.add("hidden");
+  };
+
+  // 👁 تفعيل العين
+  document.getElementById("loginEye").addEventListener("click", function(){
+    togglePassword("loginPassword", this);
+  });
+  document.getElementById("registerEye").addEventListener("click", function(){
+    togglePassword("registerPassword", this);
+  });
+
+  // 🧭 بعد تسجيل الدخول أو إنشاء الحساب — يسمح بالتمرير
+  document.getElementById("loginBtn").addEventListener("click", () => {
+    document.body.style.overflow = "auto";
+  });
+  document.getElementById("registerBtn").addEventListener("click", () => {
+    document.body.style.overflow = "auto";
+  });
+});    
   </script>
 </body>
 </html>
