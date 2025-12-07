@@ -918,6 +918,11 @@ button.accent:hover {
               <div class="order-info-item"><span class="icon">💲</span> السعر: ${o.price} $</div>
               <div class="order-info-item"><span class="icon">🔢</span> الكمية: ${o.quantity}</div>
               ${extraHtml}
+              <div class="order-info-item">
+  <span class="icon">📅</span>
+  التاريخ: ${o.createdAt?.seconds ? new Date(o.createdAt.seconds * 1000).toLocaleString("ar-EG") : "غير متوفر"}
+</div>
+
             </div>
             <span class="status-badge ${statusClass}">${statusText}</span>
             <div class="order-status-note">${statusNote}</div>
@@ -1400,3 +1405,4 @@ document.addEventListener("DOMContentLoaded", () => {
   </script>
 </body>
 </html>
+
