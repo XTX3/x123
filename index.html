@@ -643,6 +643,60 @@ button.accent:hover {
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
+
+
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-messaging-compat.js"></script>
+
+<script>
+  // إعداد FCM
+  const firebaseConfigFCM = {
+    apiKey: "AIzaSyDPcyxpHRuLx9T2CO4LJ-n9jaqAynUjvqw",
+    authDomain: "xix5-a119a.firebaseapp.com",
+    projectId: "xix5-a119a",
+    messagingSenderId: "332265425367",
+    appId: "1:332265425367:web:0a95e71d8bd0058503a392"
+  };
+
+  // تشغيل FCM
+  firebase.initializeApp(firebaseConfigFCM);
+  const messaging = firebase.messaging();
+
+  // تسجيل Service Worker
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/firebase-messaging-sw.js");
+  }
+
+  // طلب الإذن للإشعارات + تسجيل Token في Firestore
+  async function requestNotificationPermission(uid) {
+    try {
+      const token = await messaging.getToken();
+      if (!token) return;
+
+      await firebase.firestore().collection("tokens").doc(uid).set({
+        token: token,
+        uid: uid,
+        date: Date.now()
+      });
+    } catch (e) {
+      console.log("FCM Error:", e);
+    }
+  }
+
+  // استقبال الإشعارات داخل الموقع
+  messaging.onMessage((payload) => {
+    new Notification(payload.notification.title, {
+      body: payload.notification.body,
+      icon: "/icon.png"
+    });
+  });
+</script>
+
+
+
+
+    
     const firebaseConfig = {
       apiKey: "AIzaSyDPcyxpHRuLx9T2CO4LJ-n9jaqAynUjvqw",
       authDomain: "xix5-a119a.firebaseapp.com",
@@ -1409,5 +1463,6 @@ document.addEventListener("DOMContentLoaded", () => {
   </script>
 </body>
 </html>
+
 
 
