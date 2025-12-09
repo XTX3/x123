@@ -643,63 +643,15 @@ button.accent:hover {
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-
- <!-- ====== FCM (Firebase Messaging) ====== -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-messaging-compat.js"></script>
-
-<script>
-  // ننتظر حتى يتم تشغيل Firebase من الموديول
-  window.addEventListener("DOMContentLoaded", () => {
-    // استخدام نفس التطبيق الذي ينشئه سكربت الموديول
-    const messaging = firebase.messaging();
-
-    // تسجيل Service Worker
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/firebase-messaging-sw.js");
-    }
-
-    // طلب الإذن + حفظ التوكن
-    window.requestNotificationPermission = async function(uid) {
-      try {
-        const token = await messaging.getToken();
-        if (!token) return;
-
-        firebase.firestore()
-          .collection("tokens")
-          .doc(uid)
-          .set({
-            uid: uid,
-            token: token,
-            date: Date.now()
-          });
-
-      } catch (e) {
-        console.log("FCM ERROR:", e);
-      }
+    const firebaseConfig = {
+      apiKey: "AIzaSyDPcyxpHRuLx9T2CO4LJ-n9jaqAynUjvqw",
+      authDomain: "xix5-a119a.firebaseapp.com",
+      projectId: "xix5-a119a",
+      storageBucket: "xix5-a119a.appspot.com",
+      messagingSenderId: "332265425367",
+      appId: "1:332265425367:web:0a95e71d8bd0058503a392",
+      measurementId: "G-RLK4PXMV7P"
     };
-
-    // استقبال الإشعار داخل الموقع
-    messaging.onMessage((payload) => {
-      new Notification(payload.notification.title, {
-        body: payload.notification.body,
-        icon: "/icon.png"
-      });
-    });
-  });
-
-<!-- ====== END FCM ====== -->
-
-
-
-
-  const firebaseConfigFCM = {
-    apiKey: "AIzaSyDPcyxpHRuLx9T2CO4LJ-n9jaqAynUjvqw",
-    authDomain: "xix5-a119a.firebaseapp.com",
-    projectId: "xix5-a119a",
-    messagingSenderId: "332265425367",
-    appId: "1:332265425367:web:0a95e71d8bd0058503a392"
-  };
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
@@ -966,11 +918,6 @@ button.accent:hover {
               <div class="order-info-item"><span class="icon">💲</span> السعر: ${o.price} $</div>
               <div class="order-info-item"><span class="icon">🔢</span> الكمية: ${o.quantity}</div>
               ${extraHtml}
-              <div class="order-info-item">
-  <span class="icon">📅</span>
-  التاريخ: ${o.createdAt?.seconds ? new Date(o.createdAt.seconds * 1000).toLocaleString("ar-EG") : "غير متوفر"}
-</div>
-
             </div>
             <span class="status-badge ${statusClass}">${statusText}</span>
             <div class="order-status-note">${statusNote}</div>
@@ -1022,10 +969,6 @@ button.accent:hover {
               <div class="order-info-item"><span class="icon">💲</span> السعر: ${o.price} $</div>
               <div class="order-info-item"><span class="icon">🔢</span> الكمية: ${o.quantity}</div>
               ${extraHtml}
-              <div class="order-info-item">
-  <span class="icon">📅</span>
-  التاريخ: ${o.createdAt?.seconds ? new Date(o.createdAt.seconds * 1000).toLocaleString("ar-EG") : "غير متوفر"}
-</div>
             </div>
             <span class="status-badge ${statusClass}">${statusText}</span>
             ${o.status === "pending" ? `
@@ -1457,10 +1400,3 @@ document.addEventListener("DOMContentLoaded", () => {
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
