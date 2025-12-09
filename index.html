@@ -646,11 +646,12 @@ button.accent:hover {
 
 
 
+
+   <!-- ====== FCM (Firebase Messaging) ====== -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-messaging-compat.js"></script>
 
 <script>
-  // إعداد FCM
   const firebaseConfigFCM = {
     apiKey: "AIzaSyDPcyxpHRuLx9T2CO4LJ-n9jaqAynUjvqw",
     authDomain: "xix5-a119a.firebaseapp.com",
@@ -668,30 +669,32 @@ button.accent:hover {
     navigator.serviceWorker.register("/firebase-messaging-sw.js");
   }
 
-  // طلب الإذن للإشعارات + تسجيل Token في Firestore
+  // طلب الإذن للإشعارات وحفظ التوكن
   async function requestNotificationPermission(uid) {
     try {
       const token = await messaging.getToken();
       if (!token) return;
 
-      await firebase.firestore().collection("tokens").doc(uid).set({
-        token: token,
-        uid: uid,
-        date: Date.now()
-      });
+      await firebase.firestore()
+        .collection("tokens")
+        .doc(uid)
+        .set({ token: token, uid: uid, date: Date.now() });
+
     } catch (e) {
       console.log("FCM Error:", e);
     }
   }
 
-  // استقبال الإشعارات داخل الموقع
+  // استقبال إشعار داخل الموقع
   messaging.onMessage((payload) => {
     new Notification(payload.notification.title, {
       body: payload.notification.body,
       icon: "/icon.png"
     });
   });
-</script>
+
+<!-- ====== END FCM ====== -->
+ 
 
 
 
@@ -1463,6 +1466,7 @@ document.addEventListener("DOMContentLoaded", () => {
   </script>
 </body>
 </html>
+
 
 
 
