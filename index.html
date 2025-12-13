@@ -639,6 +639,8 @@ button.accent:hover {
     </div>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-messaging-compat.js"></script>
 
 <script>
   window.addEventListener("DOMContentLoaded", () => {
@@ -656,7 +658,7 @@ button.accent:hover {
         }
 
         const token = await messaging.getToken({
-          vapidKey: "ضع_هنا_VAPID_KEY"
+          vapidKey: "BEIkmsbcatAy4Kq8_ehZE19KzKQx2pHaYvIKmgTEq1oFSmePLEG7faBAsibGl1mFCNDbFv9-znm2x4DzpDISS8o"
         });
 
         if (!token) {
@@ -1457,6 +1459,7 @@ document.addEventListener("DOMContentLoaded", () => {
   </script>
 </body>
 </html>
+
 
 
 
