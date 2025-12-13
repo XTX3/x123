@@ -685,7 +685,70 @@ button.accent:hover {
   });
 </script>
 
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-messaging-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDPcyxpHRuLx9T2CO4LJ-n9jaqAynUjvqw",
+    authDomain: "xix5-a119a.firebaseapp.com",
+    projectId: "xix5-a119a",
+    messagingSenderId: "332265425367",
+    appId: "1:332265425367:web:0a95e71d8bd0058503a392"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+</script>
+
+<script>
+  let messaging;
+
+  window.addEventListener("DOMContentLoaded", async () => {
+    messaging = firebase.messaging();
+
+    if ("serviceWorker" in navigator) {
+      await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+    }
+  });
+
+  async function requestNotificationPermission(uid) {
+    try {
+      if (!uid) return;
+
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") return;
+
+      const token = await messaging.getToken({
+        vapidKey: "BEIkmsbcatAy4Kq8_ehZE19KzKQx2pHaYvIKmgTEq1oFSmePLEG7faBAsibGl1mFCNDbFv9-znm2x4DzpDISS8o"
+      });
+
+      if (!token) return;
+
+      await firebase.firestore()
+        .collection("tokens")
+        .doc(uid)
+        .set({
+          uid,
+          token,
+          createdAt: Date.now()
+        });
+
+      console.log("✅ FCM Token محفوظ");
+
+    } catch (e) {
+      console.error("FCM ERROR:", e);
+    }
+  }
+
+  // استقبال الإشعار داخل الموقع
+  firebase.messaging().onMessage((payload) => {
+    new Notification(payload.notification.title, {
+      body: payload.notification.body,
+      icon: "/icon.png"
+    });
+  });
+</script>
 
   
   <script type="module">
@@ -711,12 +774,23 @@ button.accent:hover {
     function safeSetHTML(id, html){ const e=el(id); if(e) e.innerHTML = html; }
     function safeSetSrc(id, src){ const e=el(id); if(e && e.tagName?.toLowerCase()==='img') e.src = src; }
 
-    function generateCode() {
+    function generateCode(){
       const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
       let code = "";
       for (let i = 0; i < 8; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
       return code;
     }
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // 🔔 تفعيل الإشعارات بعد تسجيل الدخول
+    requestNotificationPermission(user.uid);
+
+
+    console.log("🔔 تم تفعيل الإشعارات للمستخدم:", user.email);
+  } else {
+    console.log("🚪 المستخدم غير مسجل دخول");
+  }
+});
 
     async function login(email, password) {
       try {
@@ -1459,6 +1533,7 @@ document.addEventListener("DOMContentLoaded", () => {
   </script>
 </body>
 </html>
+
 
 
 
