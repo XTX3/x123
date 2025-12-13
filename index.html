@@ -640,29 +640,29 @@ button.accent:hover {
   </div>
 
 
-<!-- ====== FCM هنا بالضبط ====== -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-messaging-compat.js"></script>
-
 <script>
   window.addEventListener("DOMContentLoaded", () => {
-    const messaging = firebase.messaging();
 
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/firebase-messaging-sw.js");
-    }
+    const messaging = firebase.messaging();
 
     window.requestNotificationPermission = async function(uid) {
       try {
         if (!uid) return;
 
-        if (Notification.permission !== "granted") {
-          const permission = await Notification.requestPermission();
-          if (permission !== "granted") return;
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") {
+          console.warn("تم رفض الإذن");
+          return;
         }
 
-        const token = await messaging.getToken();
-        if (!token) return;
+        const token = await messaging.getToken({
+          vapidKey: "ضع_هنا_VAPID_KEY"
+        });
+
+        if (!token) {
+          console.error("لم يتم إنشاء token");
+          return;
+        }
 
         firebase.firestore()
           .collection("tokens")
@@ -673,21 +673,16 @@ button.accent:hover {
             date: Date.now()
           });
 
-      } catch (err) {
-        console.error("FCM ERROR:", err);
+        console.log("تم حفظ Token بنجاح:", token);
+
+      } catch (e) {
+        console.error("FCM ERROR:", e);
       }
     };
 
-    messaging.onMessage((payload) => {
-      new Notification(payload.notification.title, {
-        body: payload.notification.body,
-        icon: "/icon.png"
-      });
-    });
-
   });
 </script>
-<!-- ====== END FCM ====== -->
+
 
 
   
@@ -1462,6 +1457,7 @@ document.addEventListener("DOMContentLoaded", () => {
   </script>
 </body>
 </html>
+
 
 
 
